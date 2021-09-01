@@ -284,6 +284,81 @@ parseInt('1546', 2) // 1
 parseInt('546', 2) // NaN
 ```
 
+parseInt处理非字符串时，会先将参数转换为字符串。会导致一些意想不到的结果。
+```js
+parseInt(0x11, 2) // 1
+// 等同于
+parseInt(String(0x11), 2) // String(0x11) 会按照十六进制将数字转换为十进制的17，再转为字符串,7不是二进制的有效数字，所以返回1
+```
+对于八进制的0开头数字，JS不再允许将带有0前缀的数字视为八进制数，而是要求忽略这个0。但是为了保证兼容性，浏览器并没有部署这一规定。
 
+### parseFloat()
+parseFloat方法用于将一个字符串转为浮点数。如果字符串符合科学计数法，则会进行相应的转换。
+```js
+parseFloat('3.14') // 3.14
+parseFloat('314e-2') // 3.14
+parseFloat('0.0314E+2') // 3.14
+parseFloat('3.14more non-digit characters') // 3.14, 遇到不能转换的字符，停止转换
+parseFloat('\t\v\r12.34\n ') // 12.34， 自动过滤前面的空格
+parseFloat([]) // NaN， 参数不是字符串，或者转换为字符串时第一个字符不能转换为浮点数，返回NaN
+parseFloat('FF2') // NaN
+parseFloat('') // NaN
+```
 
+这些特点使得parseFloat的转换结果不同于Number函数。
+```js
+parseFloat(true)  // NaN
+Number(true) // 1
+
+parseFloat(null) // NaN
+Number(null) // 0
+
+parseFloat('') // NaN
+Number('') // 0
+
+parseFloat('123.45#') // 123.45
+Number('123.45#') // NaN
+```
+
+### isNaN()
+isNaN方法可以用来判断一个值是否为NaN。
+```js
+isNaN(NaN) // true
+isNaN(123) // false
+```
+
+isNaN只对数值有效，如果传入其他值，会被先转成数值。比如，传入字符串的时候，字符串会被先转成NaN，所以最后返回true。
+```js
+isNaN('abc') // true
+isNaN(Number('abc')) // 等同于
+
+isNaN({}) // true
+// 等同于
+isNaN(Number({})) // true
+
+isNaN(['xzy']) // true
+// 等同于
+isNaN(Number(['xzy'])) // true
+```
+出于同样的原因，对象和数组也返回true。
+
+但是空数组和只有一个数值成员的数组，isNaN返回false。原因是这些数组能被Number()转换为数值。
+```js
+isNaN([]) // false
+isNaN([123]) // false
+isNaN(['123']) // false
+```
+因此，使用isNaN()前，最好判断下数据类型。
+
+### isFinite()
+isFinite方法返回一个布尔值，表示某个值是否为正常的数值。
+```js
+isFinite(Infinity) // false
+isFinite(-Infinity) // false
+isFinite(NaN) // false
+isFinite(undefined) // false
+isFinite(null) // true
+isFinite(-1) // true
+```
+除了Infinity、-Infinity、NaN、undefined这四个值会返回false（包括被Number()转化后为NaN的值），其他数值都会返回true。
 

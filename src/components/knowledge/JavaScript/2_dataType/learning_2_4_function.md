@@ -61,7 +61,7 @@ JS将函数看作是一种值，与其他原始数据类型（数值、字符串
 由于函数与其他数据类型地位平等，所以在JS语言中又称函数为第一等公民。
 
 ### 函数声明的提升
-JS引擎将函数名视同变量名，所以采用function命令声明函数时，会像变量名一样，将函数声明到代码头部。
+JS引擎将函数名视同变量名，所以采用function命令声明函数时，会像变量名一样，将函数声明提升到代码头部。
 ```js
 f() // 不会报错
 function f() {}
@@ -109,7 +109,7 @@ length属性提供了一种机制，判断函数调用时和定义时传入参�
 ### toString()
 toString()方法返回一个字符串，内容是函数的源码，函数的注释也会返回，并且保留换行符。
 
-对于原生的函数，toString()方法返回 function name() { [native code] }。
+对于JS中的原生函数，toString()方法返回 function name() { [native code] }。
 ```js
 Object.assign.toString() // "function assign() { [native code] }"
 ```
@@ -183,7 +183,7 @@ f() // 1
 ```
 函数执行时所在的作用域，是定义时的作用域，而不是调用时所在的作用域。
 
-同样的，函数体内部声明的函数，作用域绑定函数体内部。
+同样的，函数体内部声明的函数，作用域绑定在函数体内部。
 ```js
 function foo() {
     var x = 1;
@@ -242,7 +242,7 @@ arr // [1, 2, 3]
 ```
 
 ### 同名参数
-如果有同名的参数，则取最后出现的那个值，即使后一个参数值没有赋值，也以其为准。
+如果有同名的参数，则取最后出现的那个值，即使后一个参数值没有被赋值，也以其为准。
 ```js
 function f1(a, a) {
     console.log(a);
@@ -252,7 +252,159 @@ f1(1, 2) // 2
 f1(1) // undefined
 ```
 
+### arguments对象
+1. arguments对象包含的函数运行时的所有参数。arguments[0]代表第一参数，依次类推。anguments只能在函数内部使用。
+```js
+var f = function () {
+    console.log(arguments[0]);
+    console.log(arguments[1]);
+    console.log(arguments[2]);
+}
 
+f(1, 2, 3) 
+// 1
+// 2
+// 3
+```
+
+2. arguments对象可以在运行时修改传入参数。但严格模式下，修改arguments对象不会影响传入参数。
+```js
+var f1 = function(a, b) {
+  arguments[0] = 3;
+  arguments[1] = 2;
+  return a + b;
+};
+
+f1(1, 1) // 5
+
+var f2 = function(a, b) {
+  'use strict'; // 开启严格模式
+  arguments[0] = 3;
+  arguments[1] = 2;
+  return a + b;
+};
+
+f2(1, 1) // 2
+```
+
+3. 通过arguments的length属性，可以判断函数调用时到底传了几个参数。
+```js
+function f() {
+    console.log(arguments.length)
+}
+
+f(1, 2, 3) // 3
+```
+4. arguments看起来像是数组，但其实是个对象，键名为数字。
+
+5. 通过arguments.callee属性，可以获得原函数。
+```js
+var f = function () {
+    console.log(arguments.callee == f)
+}
+
+f() // true
+```
+但这个属性在严格模式下是禁用的，所以不推荐使用。
+
+## 其他
+### 闭包
+闭包（closure）是JS的一个特色。
+闭包通过JS中的函数作用域实现。ES5中，JS有两种作用域：全局作用域和函数作用域。
+在函数中用var声明的变量，具有函数作用域，在函数外无法被读取。但是可以通过在函数内在定义一个函数读取外层函数作用域的变量。
+```js
+function f1(x) {
+    return function f2 () {
+        x += 1;
+        console.log(x);
+    }
+}
+
+var func = f1(0);
+func() // 1
+func() // 2
+```
+由于f2在f1中定义，所以f1中的所有局部变量对f2都是可见的，但是反过来不行，f1不能读取f2中定义的局部变量。
+这就是JS中的链式作用域（chain scope），子对象会一级一级的向上寻找父对象的变量。所以父对象的所有变量对子对象都是可见的，反之不成立。
+
+闭包就是函数f2，即能够读取其他函数局部变量的函数。闭包最大的特点，就是它能记住它“诞生的环境”。比如f2记住了它的诞生环境f1，所以f2可以得到f1的内部变量。
+本质上，闭包是将函数内部和函数外部联系起来的一座桥梁（可以在函数外部访问函数内部变量）。
+
+闭包最大的用处有两个。
+* 可以读取外部函数的局部变量。
+* 可以将这些变量始终保持在内存中，即闭包的诞生环境会一直存在。
+
+由于闭包用到了外层函数的变量，导致外层函数一直不能从内存中被释放。只要闭包没有被垃圾回收机制清除，外层函数提供的运行环境也不会被清除，它的内部变量就会保存着当前值，供闭包读取。
+
+闭包的另一个用处，是封装对象的私有属性和私有方法。
+```js
+function Person(name) {
+    var _age; // 私有属性
+    function getAge() { // 公有方法
+        return _age;
+    }
+    function setAge(age) {
+        _age = age;
+    }
+
+    return {
+        name: name, // 公有属性
+        getAge: getAge， // 公有方法
+        setAge: setAge，
+    }
+}
+
+var p = Person('Jack')
+p._age // undefined
+p.name // Jack
+p.getAge() // undefined
+p.setAge(11)
+p.getAge() // 11
+```
+
+每一次外部函数f2执行，都会产生一个新的闭包，而这个闭包会保留外部函数的局部变量，所以内存消耗很大。因此不能滥用闭包，否则会造成性能问题。
+
+### 立即调用表达式（IIFE）
+function表达式会被JS引擎当做一个值，函数表达式后加上圆括号()可以立即调用函数。
+```js
+var func = function () { console.log(1) } (); // 1
+```
+
+但是不能在函数声明中使用，会有语法错误。因为JS引擎无法判断这是表达式还是一条语句。
+```js
+function f() { console.log(1) } () // SyntaxError: Unexpected token )
+```
+
+为了避免解析的歧义，JavaScript 规定，如果function关键字出现在行首，一律解释成语句。因此，引擎看到行首是function关键字之后，认为这一段都是函数的定义，不应该以圆括号结尾，所以就报错了。
+
+最简单的解决办法是在外面加上圆括号()，这样JS就会认为它是一个表达式。
+```js
+(function f() { console.log(1) } ()); // 1
+(function f() { console.log(1) })(); // 1
+```
+这就叫做函数立即调用表达式（Immediately-Invoked Function Expression），简称IIFE。
+
+这种方法需要在末尾加上分号，不加分号连续两个IIFE后一个会被当成前一个的参数。
+```js
+(function f() { console.log(1) } ())
+(function f() { console.log(1) } ()) // 被当成前一个的参数
+```
+
+任何能让JS解释器以表达式来处理函数的地方，都能直接使用圆括号立即调用函数。
+```js
+var i = function(){ return 10; }();
+true && function(){ /* code */ }();
+0, function(){ /* code */ }();
+
+!function () { /* code */ }();
+~function () { /* code */ }();
+-function () { /* code */ }();
++function () { /* code */ }();
+```
+
+通常情况下，只对匿名函数使用这种方法，目的有两个，一是不用为函数命名，防止污染全局变量；二是IIFE内部形成了一个单独的作用域，可以封装一些外部无法读取的私有变量。
+
+### eval命令
 
 
 

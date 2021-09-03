@@ -55,13 +55,15 @@ module.exports = {
     // pwa: {}, 
     // webpack-dev-server 相关配置
     devServer: {
-        open: true,
+        contentBase: path.join(__dirname, 'dist'),
+        // open: true,
+        hot: true,
         host: 'localhost',
         port: 80,
-        https: false,
-        hotOnly: false,
+        // https: false,
+        // hotOnly: false,
         before: function(app) {
-            app.use('/dummy', apiMocker('/dummy'))
+            app.use(apiMocker('/dummy', 'dummy'))
         }
         // http 代理配置
         // proxy: {      

@@ -405,8 +405,58 @@ true && function(){ /* code */ }();
 通常情况下，只对匿名函数使用这种方法，目的有两个，一是不用为函数命名，防止污染全局变量；二是IIFE内部形成了一个单独的作用域，可以封装一些外部无法读取的私有变量。
 
 ### eval命令
+eval命令接受一个字符串作为参数，并将这个字符串当做语句执行。
+如果参数语句无法当做语句执行，那么就会报错。
+```js
+eval('3x') // Uncaught SyntaxError: Invalid or unexpected token
+```
+防在eval中的字符串，应该有独自存在的意义，不能用来与eval以外的命令配合使用。
+```js
+eval('return;') // Uncaught SyntaxError: Illegal return statement
+```
+return不能单独使用，必须在函数中使用。
 
+如果eval的参数不是字符串，那么会原样返回。
 
+eval没有自己的作用域，都在当前作用域内执行，因此可能会修改当前作用域的变量的值，造成安全问题。
+```js
+var a = 1;
+eval('a = 2;');
 
+a // 2
+```
 
+严格模式下，eval中声名的变量，不影响外部变量；但是eval仍然能读写外部变量的值。
+```js
+(function f() {
+    'use strict';
+    var b = 1
+    eval('var a = 1');
+    eval('b = 2');
+    console.log(a) // ReferenceError: a is not defined
+    console.log(b) // 2
+})()
+```
+
+由于eval别名调用时，JS引擎静态解析时无法分辨执行的是eval。
+为了保证eval的别名调用不影响代码优化。JS的标准规定，凡是使用别名调用eval，eval内部都是全局作用域。
+```js
+var a = 1;
+
+function f() {
+  var a = 2;
+  var e = eval;
+  e('console.log(a)');
+}
+
+f() // 1
+```
+eval的别名调用五花八门，只要不是直接用eval命令调用，都属于别名调用，因为引擎只能识别这一种形式是直接调用。
+```js
+eval.call(null, '...')
+window.eval('...')
+(1, eval)('...')
+(eval, eval)('...')
+```
+以上都是eval的别名调用，都是全局作用域。
 

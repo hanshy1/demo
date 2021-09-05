@@ -62,7 +62,137 @@ a.length // 0
 a[2.1] = 'abc';
 a.length // 0
 ```
+如果数组的键名是添加超出范围的数值，键名会自动转换为字符串。
+```js
+var arr = [];
+arr[-1] = 'a';
+arr[Math.pow(2, 32)] = 'b';
 
+arr.length // 0
+arr[-1] // "a"
+arr[4294967296] // "b"
+```
 
+## in运算符
+检查某个键名是否存在于数组上，可以用in运算符，适用于数组，也适用于对象。
 
+如果数组的某个位置是空位，in运算符返回false。
+```js
+var arr = [];
+arr[100] = 'a';
 
+100 in arr // true
+1 in arr // false
+```
+
+## for...in...循环
+for...in...循环不仅会遍历数组的数字键，还会遍历数组的非数字键。
+```js
+var a = [1, 2, 3];
+a.foo = true;
+
+for (var key in a) {
+  console.log(key);
+}
+// 0
+// 1
+// 2
+// foo
+```
+所以不推荐适用for...in...遍历数组，可以使用for，forEach方法。
+
+## 数组的空位
+当数组的某个位置是空元素，即两个逗号之间没有任何值，我们称该数组存在空位（hole）。数组的最后一个元素后有逗号，不会产生空位。
+数组的空位不影响length属性。
+```js
+var a = [1, , 3,]
+a.length // 3
+a[1] // undefined
+```
+数组的空位可以读取，返回undefined。
+
+使用delete命令删除一个数组成员，会形成空位，并且不会影响length属性。
+```js
+var a = [1, 2, 3];
+delete a[1];
+
+a[1] // undefined
+a.length // 3
+```
+length属性不会过滤空位，所以使用length属性遍历数组时，需要小心。
+
+数组某个位置是空位，和某个位置被赋值为undefined是不同的。如果是空位，使用forEach方法、for...in...结构、Object.keys()方法进行遍历时，会跳过空位。
+```js
+var a = [, , ,];
+
+a.forEach(function (x, i) {
+  console.log(i + '. ' + x);
+})
+// 没有输出
+```
+也就是说，空位指的是数组没有这个元素，所以不会遍历到；而undefined表示数组有这个元素，值是undefined。
+
+## 类似数组的对象
+如果一个对象的所有键名都是正整数或零，并且有length属性，那个这个对象被称为类似数组的对象（array-like object）。
+```js
+var obj = {
+  0: 'a',
+  1: 'b',
+  2: 'c',
+  length: 3
+};
+
+obj[0] // 'a'
+obj[1] // 'b'
+obj.length // 3
+obj.push('d') // TypeError: obj.push is not a function
+```
+类数组对象不具有数组特有的方法。
+类似数组的对象的根本特征，就是具有length属性，但length属性不是动态值。
+
+典型的类似数组的对象是函数的arguments对象，DOM元素集，字符串等。
+```js
+// arguments对象
+function args() { return arguments }
+var arrayLike = args('a', 'b');
+
+arrayLike[0] // 'a'
+arrayLike.length // 2
+arrayLike instanceof Array // false
+
+// DOM元素集
+var elts = document.getElementsByTagName('h3');
+elts.length // 3
+elts instanceof Array // false
+
+// 字符串
+'abc'[1] // 'b'
+'abc'.length // 3
+'abc' instanceof Array // false
+```
+
+数组的slice方法可以将类似数组的对象转换为数组。
+```js
+var arr = Array.prototype.slice.call(arrayLike);
+```
+
+通过call方法改变this指向，可以使类似数组的对象调用定义在数组原型上的方法。
+```js
+// forEach 方法
+function logArgs() {
+  Array.prototype.forEach.call(arguments, function (elem, i) {
+    console.log(i + '. ' + elem);
+  });
+}
+```
+
+这种方式比直接使用数组原生的forEach方法要慢，所以最好先用slice将其转为数组，在调用forEach方法。
+```js
+var arr = Array.prototype.slice.call('abc');
+arr.forEach(function (chr) {
+  console.log(chr);
+});
+// a
+// b
+// c
+```

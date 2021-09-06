@@ -34,7 +34,7 @@ false + 'a' // "falsea"
 如果加法中的运算子为对象，必须先转换为原始类型的值，在进行运算。
 对象转换成原始类型值的规则：
 * 首先调用对象的valueOf()方法，Object.prototype.valueOf()方法通常会返回对象自身。
-* 如果valueOf()方法没有返回原始类型的值，就会调用valueOf返回值的toString()方法，将其转换为字符串。
+* 如果valueOf()方法没有返回原始类型的值，就会对象的toString()方法，将其转换为字符串。
 ```js
 var obj = { p: 1 };
 obj.valueOf().toString() // "[object Object]"

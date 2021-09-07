@@ -63,5 +63,226 @@ Object.defineProperty()和Object.defineProperties()参数里面的属性描述�
 属性描述对象的各个属性称为“元属性”，因为它们可以看作是控制属性的属性。
 
 ## value
+value属性是目标属性的值。
+```js
+var obj = {};
+obj.p = 123;
 
+Object.getOwnPropertyDescriptor(obj, 'p').value // 123
+```
+
+## writable
+writable属性是一个布尔值，决定了目标属性的值（value）是否可以被改变。
+```js
+var obj = {};
+
+Object.defineProperty(obj, 'a', {
+  value: 37,
+  writable: false
+});
+
+obj.a // 37
+obj.a = 25;
+obj.a // 37
+```
+
+正常模式下，对writable为false的属性赋值不会报错，只会默默失败。严格模式下，会报错。
+
+如果原型对象的某个属性的writable为false，那么子对象将无法自定义这个属性。
+```js
+var proto = Object.defineProperty({}, 'foo', {
+  value: 'a',
+  writable: false
+});
+
+var obj = Object.create(proto);
+
+obj.foo = 'b';
+obj.foo // 'a'
+```
+但是，有一个规避方法，就是通过覆盖属性描述对象，绕过这个限制。原因是这种情况下，原型链会被完全忽视。
+```js
+var proto = Object.defineProperty({}, 'foo', {
+  value: 'a',
+  writable: false
+});
+
+var obj = Object.create(proto);
+Object.defineProperty(obj, 'foo', {
+  value: 'b'
+});
+
+obj.foo // "b"
+```
+
+## enumerable
+enumerable（可遍历性）返回一个布尔值，表示目标属性是否可遍历。
+
+如果一个属性的enumerable为false，下面三个操作不会取到该属性。
+* for..in循环
+* Object.keys方法
+* JSON.stringify方法
+
+in运算符不管某个属性是对象自身的还是继承的，都会返回true。
+
+只有可遍历的属性(包括继承的属性)，才会被for...in循环遍历，同时还规定toString这一类实例对象继承的原生属性，都是不可遍历的，这样就保证了for...in循环的可用性。
+
+Object.keys方法不包括继承的或不可遍历的属性。如果需要获取对象自身的所有属性(不包括继承的属性)，不管是否可遍历，可以使用Object.getOwnPropertyNames方法。
+
+JSON.stringify方法会排除enumerable为false的属性，有时可以利用这一点。如果对象的 JSON 格式输出要排除某些属性，就可以把这些属性的enumerable设为false。
+
+## configurable
+configurable(可配置性）返回一个布尔值，决定了是否可以修改属性描述对象。
+configurable为false时，writable、enumerable和configurable都不能被修改了。
+* writable属性只有在false改为true时会报错，true改为false是允许的。
+* value属性的情况比较特殊。只要writable和configurable有一个为true，就允许改动value。
+* 目标属性不能被删除（delete）
+
+```js
+var obj = Object.defineProperty({}, 'p', {
+  value: 1,
+  writable: false,
+  enumerable: false,
+  configurable: false
+});
+
+Object.defineProperty(obj, 'p', {writable: true})
+// TypeError: Cannot redefine property: p
+
+Object.defineProperty(obj, 'p', {enumerable: true})
+// TypeError: Cannot redefine property: p
+
+Object.defineProperty(obj, 'p', {configurable: true})
+// TypeError: Cannot redefine property: p
+```
+
+# 存取器
+属性还可以用存取器（accessor）定义。存值函数称为setter，使用属性描述对象的set属性；取值函数称为getter，使用属性描述对象的get属性。
+
+一旦对目标属性定义了存取器，那么存取的时候，都将执行对应的函数。
+
+有两种写法。
+```js
+// 写法一
+var obj1 = Object.defineProperty({}, 'p', {
+  get: function () {
+    return 'getter';
+  },
+  set: function (value) {
+    console.log('setter: ' + value);
+  }
+});
+
+obj1.p // "getter"
+obj1.p = 123 // "setter: 123"
+
+// 写法二
+var obj2 = {
+  get p() {
+    return 'getter';
+  },
+  set p(value) {
+    console.log('setter: ' + value);
+  }
+};
+```
+
+# 控制对象的状态
+有时需要冻结对象的读写状态，防止对象被改变。
+JavaScript 提供了三种冻结方法，最弱的一种是Object.preventExtensions，其次是Object.seal，最强的是Object.freeze。
+
+## Object.preventExtensions()
+Object.preventExtensions方法可以使得一个对象无法再添加新的属性。但是可以修改原有的属性的值。因为可写性由writable决定。
+```js
+var obj = { a: 1 };
+Object.preventExtensions(obj);
+
+Object.defineProperty(obj, 'p', {
+  value: 'hello'
+});
+// TypeError: Cannot define property:p, object is not extensible.
+
+obj.p = 1;
+obj.p // undefined
+
+obj.a = 2;
+obj.a // 2
+```
+
+## Object.isExtensible()
+Object.isExtensible方法用于检查一个对象是否可以添加属性。返回false，表示已经不能添加新属性了。
+
+## Object.seal()
+Object.seal方法使得一个对象既无法添加新属性，也无法删除旧属性。但是可以修改原有的属性的值。
+```js
+var obj = { p: 'hello' };
+Object.seal(obj);
+
+delete obj.p;
+obj.p // "hello"
+
+obj.x = 'world';
+obj.x // undefined
+```
+Object.seal实质是把属性描述对象的configurable属性设为false，因此属性描述对象不再能改变了。
+
+## Object.isSealed()
+Object.isSealed方法用于检查一个对象是否使用了Object.seal方法。
+使用Object.seal方法后，Object.isExtensible方法也返回false。
+```js
+var obj = { p: 'a' };
+
+Object.seal(obj);
+Object.isSealed(obj) // true
+Object.isExtensible(obj) // false
+```
+
+## Object.freeze()
+Object.freeze方法可以使得一个对象无法添加新属性、无法删除旧属性、也无法改变属性的值，使得这个对象实际上变成了常量。
+```js
+var obj = {
+  p: 'hello'
+};
+
+Object.freeze(obj);
+
+obj.p = 'world';
+obj.p // "hello"
+
+obj.t = 'hello';
+obj.t // undefined
+
+delete obj.p // false
+obj.p // "hello"
+```
+这些操作并不报错，只是默默地失败。如果在严格模式下，则会报错。
+
+## Object.isFrozen()
+Object.isFrozen方法用于检查一个对象是否使用了Object.freeze方法。
+
+## 局限性
+上面的三个方法锁定对象的可写性有一个漏洞：可以通过改变原型对象，来为对象增加属性。
+```js
+var obj = new Object();
+Object.preventExtensions(obj);
+
+var proto = Object.getPrototypeOf(obj);
+proto.t = 'hello';
+obj.t
+// hello
+```
+可以通过把原型对象也冻住，来解决这个问题。
+
+另外一个局限是，如果属性值是对象，上面这些方法只能冻结参数指向的对象，而不能冻结参数对象属性值指向的对象。
+```js
+var obj = {
+  foo: 1,
+  bar: ['a', 'b']
+};
+Object.freeze(obj);
+
+obj.bar.push('c');
+obj.bar // ["a", "b", "c"]
+```
+obj.bar属性指向一个数组，obj对象被冻结以后，这个指向无法改变，即无法指向其他值，但是所指向的数组是可以改变的。
 

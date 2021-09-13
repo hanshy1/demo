@@ -140,7 +140,78 @@ sort方法对数组成员进行排序，默认是按照字典顺序排序。排�
 自定义的排序函数应该返回数值，否则不同的浏览器可能有不同的实现，不能保证结果都一致。
 
 ## map()
-map()方法将数组的所有成员依次传入参数函数，然后把每一次的执行结果组成一个新数组返回。
+map()方法将数组的所有成员依次传入参数函数，然后把每一次的执行结果组成一个新数组返回，原数组不变。
+```js
+var arr = [1, 2, 3];
+var arr1 = arr.map(function(elem, index, arr) => {
+    return elem + 1;
+}, this)
+```
+map接收一个callback函数作为参数，函数的elem参数代表当前元素，index代表当前索引，arr代表原数组。
+map接收第二个参数，用于绑定callback中的this。
+
+map方法会跳过数组中的空位。但是返回的数组中，空位所在的位置仍是空位。
+```js
+[1, , 2].map(function(item) { return 'a' }) // ['a', , 'a']
+```
+
+## forEach()
+forEach用于遍历数组，但是没有返回值。
+forEach接收参数的方式和map相同。
+forEach中使用break不能跳出循环结构。
+forEach也会跳过数组的空位。
+
+## filter()
+filter()方法用于过滤数组成员，满足条件的成员组成一个新数组返回，原数组不变。
+filter接收参数的方式和map相同。
+
+## some()，every()
+这两个方法类似“断言”（assert），返回一个布尔值，表示判断数组成员是否符合某种条件。
+some方法是只要一个成员的返回值是true，则整个some方法的返回值就是true，否则返回false。
+every方法是所有成员的返回值都是true，整个every方法才返回true，否则返回false。
+接收参数方式和map相同。
+
+## reduce()，reduceRight()
+reduce()方法和reduceRight()方法依次处理数组的每个成员，最终累计为一个值。
+reduce()是从左到右处理（从第一个成员到最后一个成员），reduceRight()则是从右到左处理。
+
+```js
+var arr = [1, 2, 3]
+arr.reduce(function(previous, current, index, arr) {
+    return previous + current;
+}, init)
+```
+reduce和reduceRight接收一个callback函数作为参数。
+* previous，第一个参数，代表上一次调用callback函数的返回值，必须参数。
+* current，第二个参数，代表当前元素，必须参数。
+* index， 第三个参数，代表当前索引，可选参数。
+* arr，第四个参数，代表原数组，可选参数。
+* init，初始值，作为第一次调用callback时previous的初始值。
+
+省略init时，previous的初始值是数组的第一个元素。
+推荐添加init参数，可以防止对空数组执行reduce会报错的问题。
+```js
+function add(prev, cur) {
+  return prev + cur;
+}
+
+[].reduce(add)
+// TypeError: Reduce of empty array with no initial value
+[].reduce(add, 1)
+// 1
+```
+
+## indexOf()，lastIndexOf()
+indexOf方法返回给定元素在数组中第一次出现的位置，如果没有出现则返回-1。
+lastIndexOf方法返回给定元素在数组中最后一次出现的位置，如果没有出现则返回-1。
+indexOf方法还可以接受第二个参数，表示搜索的开始位置。
+```js
+['a', 'b', 'c'].indexOf('a', 1) // -1
+
+var a = [2, 5, 9, 2];
+a.lastIndexOf(2) // 3
+```
+这两个方法不能用来搜索NaN的位置，即它们无法确定数组成员是否包含NaN。因为这两个方法内部使用===运算符进行比较。
 
 
 

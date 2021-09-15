@@ -150,6 +150,83 @@ d.toLocaleTimeString()
 // 英文版浏览器为"12:00:00 AM"
 ```
 
+这三个方法都有两个可选的参数。
+```js
+dateObj.toLocaleString([locales[, options]])
+dateObj.toLocaleDateString([locales[, options]])
+dateObj.toLocaleTimeString([locales[, options]])
+```
+locales是一个指定所用语言的字符串，options是一个配置对象。
 
+options配置对象有以下属性。
+* dateStyle：可能的值为full、long、medium、short。
+* timeStyle：可能的值为full、long、medium、short。
+* month：可能的值为numeric、2-digit、long、short、narrow。
+* year：可能的值为numeric、2-digit。
+* weekday：可能的值为long、short、narrow。
+* day、hour、minute、second：可能的值为numeric、2-digit。
+* timeZone：可能的值为 IANA 的时区数据库。
+* timeZooneName：可能的值为long、short。
+* hour12：24小时周期还是12小时周期，可能的值为true、false。
 
+## get类方法
+Date对象提供了一系列get*方法，用来获取实例对象某个方面的值。
+* getTime()：返回实例距离1970年1月1日00:00:00的毫秒数，等同于valueOf方法。
+* getFullYear()：返回四位的年份。
+* getMonth()：返回月份（0表示1月，11表示12月）。（0-11）
+* getDate()：返回实例对象对应每个月的几号（从1开始）（1-31）。
+* getDay()：返回星期几，星期日为0，星期一为1，以此类推（0-6）。
+* getHours()：返回小时（0-23）。
+* getMinutes()：返回分钟（0-59）。
+* getSeconds()：返回秒（0-59）。
+* getMilliseconds()：返回毫秒（0-999）。
+* getTimezoneOffset()：返回当前时间与 UTC 的时区差异，以分钟表示，返回结果考虑到了夏令时因素。
+
+所有这些get*方法返回的都是整数，不同方法返回值的范围不一样。
+
+以上方法返回的都是当前时区的时间，Date对象还提供了返回UTC时间的对应方法。
+* getUTCDate()
+* getUTCFullYear()
+* getUTCMonth()
+* getUTCDay()
+* getUTCHours()
+* getUTCMinutes()
+* getUTCSeconds()
+* getUTCMilliseconds()
+
+## set类方法
+Date对象提供了一系列set*方法，用来设置实例对象的各个方面。
+* setDate(date)：设置实例对象对应的每个月的几号（1-31），返回改变后毫秒时间戳。
+* setFullYear(year [, month, date])：设置四位年份。
+* setHours(hour [, min, sec, ms])：设置小时（0-23）。
+* setMilliseconds()：设置毫秒（0-999）。
+* setMinutes(min [, sec, ms])：设置分钟（0-59）。
+* setMonth(month [, date])：设置月份（0-11）。
+* setSeconds(sec [, ms])：设置秒（0-59）。
+* setTime(milliseconds)：设置毫秒时间戳。
+
+这些方法基本是跟get*方法一一对应的，但是没有setDay方法，因为星期几是计算出来的，而不是设置的。
+
+set*方法的参数都会自动折算。以setDate()为例，如果参数超过当月的最大天数，则向下一个月顺延，如果参数是负数，表示从上个月的最后一天开始减去的天数。
+
+set类方法和get类方法，可以结合使用，得到相对时间。
+```js
+var d = new Date();
+
+// 将日期向后推1000天
+d.setDate(d.getDate() + 1000);
+// 将时间设为6小时后
+d.setHours(d.getHours() + 6);
+// 将年份设为去年
+d.setFullYear(d.getFullYear() - 1);
+```
+
+同样有set*的UTC时间版本。
+* setUTCDate()
+* setUTCFullYear()
+* setUTCHours()
+* setUTCMilliseconds()
+* setUTCMinutes()
+* setUTCMonth()
+* setUTCSeconds()
 

@@ -88,9 +88,120 @@ JSON.stringify(obj, f)
 // '{"a":{"b":1}}'
 ```
 递归处理中，每一次处理的对象，都是前一次返回的值。
+```js
+var obj = {a: 1};
 
+function f(key, value) {
+  if (typeof value === 'object') {
+    return {b: 2};
+  }
+  return value * 2;
+}
 
+JSON.stringify(obj, f)
+// "{"b": 4}"
+```
 
+如果处理函数返回undefined或没有返回值，则该属性会被忽略。
+```js
+function f(key, value) {
+  if (typeof(value) === "string") {
+    return undefined;
+  }
+  return value;
+}
+
+JSON.stringify({ a: "abc", b: 123 }, f)
+// '{"b": 123}'
+```
+
+## 第三个参数
+JSON.stringify()还可以接受第三个参数，用于增加返回的 JSON 字符串的可读性。
+
+默认返回的是单行字符串，对于大型的 JSON 对象，可读性非常差。第三个参数使得每个属性单独占据一行，并且将每个属性前面添加指定的前缀（不超过10个字符）。
+```js
+// 默认输出
+JSON.stringify({ p1: 1, p2: 2 })
+// JSON.stringify({ p1: 1, p2: 2 })
+
+// 分行输出
+JSON.stringify({ p1: 1, p2: 2 }, null, '\t')
+// {
+// 	"p1": 1,
+// 	"p2": 2
+// }
+```
+
+上面例子中，第三个属性\t在每个属性前面添加一个制表符，然后分行显示。
+第三个属性如果是一个数字，则表示每个属性前面添加的空格（最多不超过10个）。
+```js
+JSON.stringify({ p1: 1, p2: 2 }, null, 2);
+/*
+"{
+  "p1": 1,
+  "p2": 2
+}"
+*/
+```
+
+## 参数对象的 toJSON() 方法
+如果参数对象有自定义的toJSON()方法，那么JSON.stringify()会使用这个方法的返回值作为参数，而忽略原对象的其他属性。
+
+```js
+var user = {
+  firstName: '三',
+  lastName: '张',
+  toJSON: function () {
+    return {
+      name: this.lastName + this.firstName
+    };
+  }
+};
+
+JSON.stringify(user)
+// "{"name":"张三"}"
+```
+
+Date对象就有一个自己的toJSON()方法。
+```js
+var date = new Date('2015-01-01');
+date.toJSON() // "2015-01-01T00:00:00.000Z"
+JSON.stringify(date) // ""2015-01-01T00:00:00.000Z""
+```
+
+# JSON.parse()
+JSON.parse()方法用于将 JSON 字符串转换成对应的值。
+```js
+JSON.parse('{}') // {}
+JSON.parse('true') // true
+JSON.parse('"foo"') // "foo"
+JSON.parse('[1, 5, "false"]') // [1, 5, "false"]
+JSON.parse('null') // null
+
+var o = JSON.parse('{"name": "张三"}');
+o.name // 张三
+```
+
+如果传入的字符串不是有效的 JSON 格式，JSON.parse()方法将报错。
+```js
+JSON.parse("'String'") // illegal single quotes 
+// SyntaxError: Unexpected token ILLEGAL
+```
+
+为了防止解析错误，可以将JSON.parse()放在try...catch中。
+
+JSON.parse()方法可以接受一个处理函数，作为第二个参数，用法与JSON.stringify()方法类似。
+```js
+function f(key, value) {
+  if (key === 'a') {
+    return value + 10;
+  }
+  return value;
+}
+
+JSON.parse('{"a": 1, "b": 2}', f)
+// {a: 11, b: 2}
+```
 
 
 

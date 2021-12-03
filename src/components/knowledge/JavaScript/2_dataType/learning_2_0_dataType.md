@@ -19,6 +19,8 @@ typeof [] // "object"
 typeof Function // "function"
 typeof undefined // "undefined"
 typeof null // "null"
+var s = Symbol()
+typeof s // 'symbol'
 ```
 
 ## null和undefined

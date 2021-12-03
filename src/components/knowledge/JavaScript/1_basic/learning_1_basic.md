@@ -20,7 +20,6 @@ var a = 1;
 ```
 JavaScript 的变量名区分大小写
 
-
 变量的声明和赋值，是分开的两个步骤
 ```js
 var a;
@@ -41,7 +40,7 @@ var a = 1;
 实际运行代码：
 ```js
 var a;
-console.log(a);
+console.log(a); // undefined
 a = 1;
 ```
 

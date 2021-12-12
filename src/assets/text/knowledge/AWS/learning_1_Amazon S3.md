@@ -53,5 +53,5 @@ Amazon S3访问点是具有专用访问策略的唯一主机名，这些策略�
 * Amazon S3访问控制-CORS
 跨源资源共享（CORS）为在一个与众
 
-
+![](../../../image/knowledge/AWS/test.png)
 

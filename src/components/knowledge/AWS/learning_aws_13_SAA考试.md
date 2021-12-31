@@ -97,3 +97,4 @@ Spot fleet实例对大数据分析，机器学习，高性能计算工作负载�
 Snowball Edge Storage Optimized可以将数据直接传送到S3或EFS、FSx上。
 Snowball 不能直接将数据传输到S3 Glacier。
 Storage Gateway 可以将文件存储在S3 Glacier中。
+ELB支持IPv4和IPv6，但不能同时支持。

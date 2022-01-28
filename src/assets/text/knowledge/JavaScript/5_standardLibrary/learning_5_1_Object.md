@@ -61,3 +61,12 @@ Object.getOwnPropertyNames(a) // ["0", "1", "length"]
 * Object.prototype.hasOwnProperty()：判断某个属性是否为当前对象自身的属性，还是继承自原型对象的属性。
 * Object.prototype.isPrototypeOf()：判断当前对象是否为另一个对象的原型。
 * Object.prototype.propertyIsEnumerable()：判断某个属性是否可枚举。
+
+# 六、遍历对象属性的方法
+* for...in...: 不包含不可枚举的属性，包含继承的属性
+* Object.keys(): 不包含不可枚举的属性，不包含继承的属性
+* Object.getOwnPropertyNames(): 包含不可枚举的属性，不包含继承的属性
+
+
+
+

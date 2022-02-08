@@ -59,7 +59,7 @@ module.exports = {
         // open: true,
         hot: true,
         host: 'localhost',
-        port: 80,
+        port: 3000,
         // https: false,
         // hotOnly: false,
         before: function(app) {

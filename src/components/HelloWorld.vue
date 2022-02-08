@@ -27,14 +27,25 @@
       <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
       <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
     </ul>
+    <button type="button" @click="isShowParentComp = !isShowParentComp">parent</button>
+    <Parent v-if="isShowParentComp" />
   </div>
 </template>
 
 <script lang="ts">
+import Parent from './page/Parent.vue'
 export default {
+  components: {
+    Parent
+  },
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  data() {
+    return {
+      isShowParentComp: false,
+    }
   }
 }
 </script>

@@ -9,9 +9,6 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'DemoBundle.js',
     },
-    plugin: [
-        new VueLoaderPlugin()
-    ],
     resolve: {
         extensions: ['.js', '.vue', '.json', '.ts'],
         alias: {
@@ -20,18 +17,21 @@ module.exports = {
     },
     module: {
         rules: [
-        {
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            exclude: /node_modules/,
-            options: {
-                appendTsSuffixTo: [/\.vue$/]
-            }
-        },
-        {
-            test: /\.vue$/,
-            loader: 'vue-loader'
-        },
-]
-    }
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+                options: {
+                    appendTsSuffixTo: [/\.vue$/]
+                }
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            },
+        ]
+    },
+    plugin: [
+        new VueLoaderPlugin()
+    ],
 }

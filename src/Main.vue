@@ -1,8 +1,14 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <!-- v-app应该只渲染一次，必须是是所有vuetify组件的祖先节点，所有vuetify组件都依赖v-app -->
+  <v-app>
+    <div id="main">
+      <img alt="Vue logo" src="./assets/logo.png">
+      <v-main>
+        <!-- v-main可作为每个组件的根节点 -->
+        <HelloWorld msg="Welcome to Your Vue.js App" />
+      </v-main>
+    </div>
+  </v-app>
 </template>
 
 <script lang="ts">

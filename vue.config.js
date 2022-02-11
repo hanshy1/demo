@@ -39,16 +39,16 @@ module.exports = {
     //     }
     // },  
     // css相关配置
-    css: {    
-        // 是否分离css（插件ExtractTextPlugin）
-        extract: true,    
-        // 是否开启 CSS source maps
-        sourceMap: false,   
-        // css预设器配置项
-        loaderOptions: {},    
-        // 是否启用 CSS modules for all css / pre-processor files.
-        modules: true
-    },  
+    // css: {    
+    //     // 是否分离css（插件ExtractTextPlugin）
+    //     extract: true,    
+    //     // 是否开启 CSS source maps
+    //     sourceMap: false,   
+    //     // css预设器配置项
+    //     loaderOptions: {},    
+    //     // 是否启用 CSS modules for all css / pre-processor files.
+    //     modules: true
+    // },  
     // 是否使用 thread-loader
     // parallel: require('os').cpus().length > 1, 
     // PWA 插件相关配置
@@ -77,6 +77,10 @@ module.exports = {
         // },
         // before: (app) => {}
     }, 
+    // 
+    transpileDependencies: [
+      'vuetify'
+    ]
     // 第三方插件配置
     // pluginOptions: {
 

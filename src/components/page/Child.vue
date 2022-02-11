@@ -1,35 +1,47 @@
 <template>
   <div>
-    <p>Hello World</p>
-    <div class="input-group">
-      <div class="input-item">
-        <label>loanTotal(W): </label>
-        <input 
-          v-model="loanTotal"
-          class="loan-input"
-          type="text">
+    <v-form
+      ref="calcForm"
+      v-model="isFormValid"
+      lazy-validation>
+      <v-text-field
+        v-model="loanTotal"
+        :counter="10"
+        :rules="nameRules"
+        label="loanTotal:"
+        required />
+      <div class="input-group">
+        <div class="input-item">
+          <label>loanTotal(W): </label>
+          <input 
+            v-model="loanTotal"
+            class="loan-input"
+            type="text">
+        </div>
+        <div class="input-item">
+          <label>loan_month: </label>
+          <input
+            v-model="loan_month"
+            class="loan-input"
+            type="text">
+        </div>
+        <div>
+          <v-btn
+            outlined
+            color="indigo"
+            @click="calculate()">
+            <v-icon>mdi-calculator</v-icon>Calculate
+          </v-btn>
+          <v-btn
+            outlined
+            color="green"
+            @click="clearResult()">
+            <v-icon>mdi-cached</v-icon>Clear
+          </v-btn>
+        </div>
       </div>
-      <div class="input-item">
-        <label>loan_month: </label>
-        <input
-          v-model="loan_month"
-          class="loan-input"
-          type="text">
-      </div>
-      <div>
-        <button
-          type="button"
-          @click="calculate()">
-          calculate
-        </button>
-        <button
-          type="button"
-          @click="clearResult()">
-          clear
-        </button>
-      </div>
-    </div>
-    <div 
+    </v-form>
+    <div
       v-if="isShowResultArea"
       class="result-area">
       <span>{{ result_loan }}</span>
@@ -49,9 +61,15 @@ export default class Child extends Vue {
   private result_arr: Array<number> = []
   private result_loan = 0
   private isShowResultArea = false
+  private isFormValid = true
+
+  private nameRules = [
+    (v: number) => !!v || 'Name is required',
+    (v: number) => (typeof v != 'number') || 'Name must be number',
+  ]
 
   mounted(): void {
-    document.body.append(this.$el)
+    // document.body.append(this.$el)
   }
 
   destroyed(): void {

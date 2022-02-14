@@ -11,7 +11,6 @@ export default {
   components: {
     Parent
   },
-  name: 'HelloWorld',
   props: {
     msg: String
   },

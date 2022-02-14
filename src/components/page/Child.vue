@@ -1,46 +1,49 @@
 <template>
   <div>
-    <v-form
-      ref="calcForm"
-      v-model="isFormValid"
-      lazy-validation>
-      <v-text-field
-        v-model="loanTotal"
-        :counter="10"
-        :rules="nameRules"
-        label="loanTotal:"
-        required />
-      <div class="input-group">
-        <div class="input-item">
-          <label>loanTotal(W): </label>
-          <input 
-            v-model="loanTotal"
-            class="loan-input"
-            type="text">
-        </div>
-        <div class="input-item">
-          <label>loan_month: </label>
-          <input
-            v-model="loan_month"
-            class="loan-input"
-            type="text">
-        </div>
-        <div>
-          <v-btn
-            outlined
-            color="indigo"
-            @click="calculate()">
-            <v-icon>mdi-calculator</v-icon>Calculate
-          </v-btn>
-          <v-btn
-            outlined
-            color="green"
-            @click="clearResult()">
-            <v-icon>mdi-cached</v-icon>Clear
-          </v-btn>
-        </div>
-      </div>
-    </v-form>
+    <div class="form-area">
+      <v-form
+        ref="calcForm"
+        v-model="isFormValid"
+        lazy-validation>
+        <v-container>
+          <v-row>
+            <v-col
+              v-for="textFieldItem in textFields"
+              :key="textFieldItem.id"
+              cols="12"
+              sm="4">
+              <v-text-field
+                v-model="$data[textFieldItem.id]"
+                :rules="textFieldItem.validate"
+                :label="textFieldItem.id + ':'"
+                :suffix="textFieldItem.suffix"
+                required
+                clearable />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="12"
+              sm="4">
+              <div class="footer-button">
+                <v-btn
+                  outlined
+                  color="indigo"
+                  @click="calculate()">
+                  <v-icon>mdi-calculator</v-icon>Calculate
+                </v-btn>
+                <v-btn
+                  outlined
+                  color="green"
+                  @click="clearResult()">
+                  <v-icon>mdi-cached</v-icon>Clear
+                </v-btn>
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-form>
+    </div>
     <div
       v-if="isShowResultArea"
       class="result-area">
@@ -54,18 +57,40 @@ import { Component, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class Child extends Vue {
-  private loanTotal = 0
-  private loan_month = 0
-  private per_year_rate = 0.05
+  private loanTotal = ''
+  private loanMonth = ''
+  private annualInterestRate = '5'
 
   private result_arr: Array<number> = []
   private result_loan = 0
   private isShowResultArea = false
   private isFormValid = true
 
-  private nameRules = [
-    (v: number) => !!v || 'Name is required',
-    (v: number) => (typeof v != 'number') || 'Name must be number',
+  private textFields = [
+    { 
+      id: 'loanTotal',
+      validate: [
+        (v: number) => !!v || v == 0 || 'loanTotal is required',
+        (v: string) => (Number(v) && parseFloat(v) > 0) || 'loanTotal must be number and more than 0',
+      ],
+      suffix: 'W'
+    },
+    { 
+      id: 'loanMonth',
+      validate: [
+        (v: number) => !!v || v == 0 || 'loanMonth is required',
+        (v: string) => (Number(v) && parseFloat(v) > 0) || 'loanMonth must be number and more than 0',
+      ],
+      suffix: 'month'
+    },
+    { 
+      id: 'annualInterestRate',
+      validate: [
+        (v: number) => !!v || 'annualInterestRate is required',
+        (v: string) => (Number(v) && parseFloat(v) > 0 && parseFloat(v) < 100) || 'annualInterestRate must be number and more than 0 or less than 100',
+      ],
+      suffix: '%'
+    }
   ]
 
   mounted(): void {
@@ -89,10 +114,15 @@ export default class Child extends Vue {
   }
 
   calculate(): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (!this.$refs.calcForm?.validate()) {
+      return
+    }
     this.result_loan = 0
-    const total = this.loanTotal * 10000
-    const months = this.loan_month
-    const per_year_rate = 0.05
+    const total = parseFloat(this.loanTotal) * 10000
+    const months = parseInt(this.loanMonth)
+    const per_year_rate = parseFloat(this.annualInterestRate) / 100
     const per_month_rate = Math.round(per_year_rate * 100000 / 12) / 100000
     let loan_overrage = total
     for (let i = 0; i < months; i ++) {
@@ -101,11 +131,12 @@ export default class Child extends Vue {
       this.result_arr.push(Math.round((total / months)) + loan_overrage * per_month_rate)
     }
     this.isShowResultArea = true
-    // console.log('loanTotal: ', this.result_loan)
-    // console.log('loan_per_month: ', this.result_arr)
   }
 
   clearResult(): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.$refs.calcForm?.resetValidation()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     Object.assign(this.$data, this.$options.data.call(this))
@@ -113,12 +144,11 @@ export default class Child extends Vue {
 }
 </script>
 <style scoped>
-  .input-group {
-    background-color: azure;
+  .form-area {
+    width: 100%;
   }
 
-  .loan-input {
-    margin-left: 10px;
-    width: 200px;
+  .footer-button button {
+    margin-right: 10px;
   }
 </style>

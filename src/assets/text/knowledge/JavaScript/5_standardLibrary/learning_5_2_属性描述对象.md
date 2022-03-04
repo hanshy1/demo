@@ -2,12 +2,12 @@
 JS提供了一个内部数据结构，用来描述对象的属性，控制它的行为，比如该属性是否可写、可遍历等等。这个内部数据结构称为“属性描述对象”（attributes object）。
 
 属性描述对象提供6个元属性。
-* value: value是该属性的属性值，默认为undefined。
-* writable: writable是一个布尔值，表示属性值（value）是否可改变（即是否可写），默认为true。
-* enumerable: enumerable是一个布尔值，表示该属性是否可遍历，默认为true。如果设为false，会使得某些操作（比如for...in循环、Object.keys()）跳过该属性。
-* configurable: configurable是一个布尔值，表示属性的可配置性，默认为true。如果设为false，将阻止某些操作改写属性描述对象。
-* get: get是一个函数，表示该属性的取值函数（getter），默认为undefined。
-* set: set是一个函数，表示该属性的存值函数（setter），默认为undefined。
+* *value*: value是该属性的属性值，默认为undefined。
+* *writable*: writable是一个布尔值，表示属性值（value）是否可改变（即是否可写），默认为true。
+* *enumerable*: enumerable是一个布尔值，表示该属性是否可遍历，默认为true。如果设为false，会使得某些操作（比如for...in循环、Object.keys()）跳过该属性。
+* *configurable*: configurable是一个布尔值，表示属性的可配置性，默认为true。如果设为false，将阻止某些操作改写属性描述对象。
+* *get*: get是一个函数，表示该属性的取值函数（getter），默认为undefined。
+* *set*: set是一个函数，表示该属性的存值函数（setter），默认为undefined。
 
 # 二、Object.getOwnPropertyDescriptor()
 Object.getOwnPropertyDescriptor()方法可以获取属性描述对象。它的第一个参数是目标对象，第二个参数是一个字符串，对应目标对象的某个属性名。
@@ -154,6 +154,8 @@ Object.defineProperty(obj, 'p', {enumerable: true})
 
 Object.defineProperty(obj, 'p', {configurable: true})
 // TypeError: Cannot redefine property: p
+
+delete obj.p // false
 ```
 
 # 七、存取器
@@ -192,7 +194,7 @@ var obj2 = {
 JavaScript 提供了三种冻结方法，最弱的一种是Object.preventExtensions，其次是Object.seal，最强的是Object.freeze。
 
 ## 1. Object.preventExtensions()
-Object.preventExtensions方法可以使得一个对象无法再添加新的属性。但是可以修改原有的属性的值。因为可写性由writable决定。
+Object.preventExtensions方法可以使得一个对象无法再添加新的属性。但是可以修改原有的属性的值，也可以删除原有属性。因为可写性由writable决定。
 ```js
 var obj = { a: 1 };
 Object.preventExtensions(obj);
@@ -207,6 +209,8 @@ obj.p // undefined
 
 obj.a = 2;
 obj.a // 2
+
+delete obj.a // true
 ```
 
 ## 2. Object.isExtensible()

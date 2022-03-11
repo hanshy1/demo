@@ -23,10 +23,10 @@ export default class VariableRectangle extends Vue {
   @Prop({ default: 'false' })
   isDraggable?: string
 
-  @Prop({ default: 0 })
+  @Prop({ default: 10 })
   minWidth?: number
 
-  @Prop({ default: 0 })
+  @Prop({ default: 10 })
   minHeight?: number
 
   @Prop()
@@ -50,24 +50,14 @@ export default class VariableRectangle extends Vue {
   private readonly MIN_RECT_HEIGHT = 100
   private readonly MIN_RECT_WIDTH = 100
 
-  // 判断宽度是否在限定范围
-  get isWidthVaild(): boolean {
-    return this.rectWidth >= (this.minWidth || 0) && (!this.maxWidth || this.rectWidth < this.maxWidth)
-  }
-
-  // 判断高度是否在限定范围
-  get isHeightValid(): boolean {
-    return this.rectHeight >= (this.minHeight || 0) && (!this.maxHeight || this.rectHeight < this.maxHeight)
-  }
-
   @Watch('isZooming', { immediate: true })
   onIsZoomingChange(newValue: boolean): void {
     if (newValue) {
-      window.addEventListener('mouseup', this.onRectZooming, true)
-      window.addEventListener('mousemove', this.endZoomRect, true)
+      window.addEventListener('mouseup', this.endZoomRect, true)
+      window.addEventListener('mousemove', this.onRectZooming, true)
     } else {
-      window.removeEventListener('mouseup', this.onRectZooming, true)
-      window.removeEventListener('mousemove', this.endZoomRect, true)
+      window.removeEventListener('mouseup', this.endZoomRect, true)
+      window.removeEventListener('mousemove', this.onRectZooming, true)
     }
   }
 
@@ -76,6 +66,7 @@ export default class VariableRectangle extends Vue {
     this.rectWidth = 200
     this.rectPositionX = 100
     this.rectPositionY = 100
+    this.setBoundaryCoordinate()
   }
 
   startZoomRect(e: MouseEvent): void {
@@ -130,13 +121,15 @@ export default class VariableRectangle extends Vue {
     }
   }
 
-  onRectZooming(): void {
+  endZoomRect(): void {
     this.isZooming = false
+    this.setBoundaryCoordinate()
   }
 
-  endZoomRect(e: MouseEvent): void {
+  onRectZooming(e: MouseEvent): void {
     e.stopPropagation()
     e.preventDefault()
+    console.log('move ', this.zoomMode)
     if (!this.isZooming) {
       return
     }
@@ -147,51 +140,76 @@ export default class VariableRectangle extends Vue {
     const offsetY = zoomEndY - this.zoomStartY
     this.zoomStartX = zoomEndX
     this.zoomStartY = zoomEndY
+    
+    const positiveOffsetX = this.isWidthVaild(this.rectWidth + offsetX) ? offsetX : 0
+    const positiveOffsetY = this.isHeightValid(this.rectHeight + offsetY) ? offsetY : 0
+    const negativeOffsetX = this.isWidthVaild(this.rectWidth + (-1 * offsetX)) ? (-1 * offsetX) : 0 
+    const negativeOffsetY = this.isHeightValid(this.rectHeight + (-1 * offsetY)) ? (-1 * offsetY) : 0
 
     // 根据缩放模式进行缩放
     switch (this.zoomMode) {
     case 'top-left':
-      this.rectPositionX += this.isWidthVaild ? offsetX : 0
-      this.rectPositionY += this.isHeightValid ? offsetY : 0
-      this.rectHeight += this.isHeightValid ? (-1 * offsetY) : 0
-      this.rectWidth += this.isWidthVaild ? (-1 * offsetX) : 0
+      this.rectPositionX += positiveOffsetX
+      this.rectPositionY += positiveOffsetY
+      this.rectHeight += negativeOffsetY
+      this.rectWidth += negativeOffsetX
       break
     case 'top':
-      this.rectPositionY += this.isHeightValid ? offsetY : 0
-      this.rectHeight += this.isHeightValid ? (-1 * offsetY) : 0
+      this.rectPositionY += positiveOffsetY
+      this.rectHeight += negativeOffsetY
       break
     case 'top-right':
-      this.rectPositionY += this.isHeightValid ? offsetY : 0
-      this.rectHeight += this.isHeightValid ? (-1 * offsetY) : 0
-      this.rectWidth += this.isWidthVaild ? offsetX : 0
+      this.rectPositionY += positiveOffsetY
+      this.rectHeight += negativeOffsetY
+      this.rectWidth += positiveOffsetX
       break
     case 'left':
-      this.rectPositionX += this.isWidthVaild ? offsetX : 0
-      this.rectWidth += this.isWidthVaild ? (-1 * offsetX) : 0
+      this.rectPositionX += positiveOffsetX
+      this.rectWidth += negativeOffsetX
       break
     case 'right':
-      this.rectWidth += this.isWidthVaild ? offsetX : 0
+      this.rectWidth += positiveOffsetX
       break
     case 'bottom-left':
-      this.rectPositionX += this.isWidthVaild ? offsetX : 0
-      this.rectHeight += this.isHeightValid ? offsetY : 0
-      this.rectWidth += this.isWidthVaild ? (-1 * offsetX) : 0
+      this.rectPositionX += positiveOffsetX
+      this.rectHeight += positiveOffsetY
+      this.rectWidth += negativeOffsetX
       break
     case 'bottom':
-      this.rectHeight += this.isHeightValid ? offsetY : 0
+      this.rectHeight += positiveOffsetY
       break
     case 'bottom-right':
-      this.rectHeight += this.isHeightValid ? offsetY : 0
-      this.rectWidth += this.isWidthVaild ? offsetX : 0
+      this.rectHeight += positiveOffsetY
+      this.rectWidth += positiveOffsetX
       break
     default:
       break
     }
   }
 
+  // 判断宽度是否在限定范围
+  isWidthVaild(width: number): boolean {
+    return width >= (this.minWidth || 10) && (!this.maxWidth || this.rectWidth <= this.maxWidth)
+  }
+
+  // 判断高度是否在限定范围
+  isHeightValid(height: number): boolean {
+    return height >= (this.minHeight || 10) && (!this.maxHeight || this.rectHeight <= this.maxHeight)
+  }
+
+  setBoundaryCoordinate(): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const rect = this.$refs.rect.getBoundingClientRect()
+  }
+
   onDragStart(e: DragEvent): void {
     this.dragStartX = e.clientX
     this.dragStartY = e.clientY
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move'
+    }
+    document.body.addEventListener('dragover', this.onDragging, true)
   }
 
   onDragEnd(e: DragEvent): void {
@@ -199,6 +217,14 @@ export default class VariableRectangle extends Vue {
     const offsetY = e.clientY - this.dragStartY
     this.rectPositionX += offsetX
     this.rectPositionY += offsetY
+    document.body.removeEventListener('dragover', this.onDragging, true)
+  }
+
+  onDragging(e: DragEvent): void {
+    e.preventDefault()
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move'
+    }
   }
 }
 </script>
@@ -214,34 +240,34 @@ export default class VariableRectangle extends Vue {
   }
 
   .zoom-rect-top {
-    cursor:n-resize
+    cursor:n-resize !important
   }
 
   .zoom-rect-top-left {
-    cursor:nw-resize
+    cursor:nw-resize !important
   }
 
   .zoom-rect-top-right {
-    cursor:ne-resize
+    cursor:ne-resize !important
   }
 
   .zoom-rect-right {
-    cursor:e-resize
+    cursor:e-resize !important
   }
 
   .zoom-rect-bottom {
-    cursor:s-resize
+    cursor:s-resize !important
   }
 
   .zoom-rect-bottom-left {
-    cursor:sw-resize
+    cursor:sw-resize !important
   }
 
   .zoom-rect-bottom-right {
-    cursor:se-resize
+    cursor:se-resize !important
   }
 
   .zoom-rect-left {
-    cursor:w-resize
+    cursor:w-resize !important
   }
 </style>

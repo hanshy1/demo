@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <button type="button" @click="isShowParentComp = !isShowParentComp">parent</button>
-    <Parent v-if="isShowParentComp" />
+    <Parent v-if="isShowParentComp" :watch-value="watchValue"/>
   </div>
 </template>
 
@@ -17,6 +17,16 @@ export default {
   data() {
     return {
       isShowParentComp: false,
+      watchValue: false
+    }
+  },
+  watch: {
+    isShowParentComp: {
+      handler(newValue) {
+        setTimeout(function() {
+          this.watchValue = !this.watchValue
+        }, 1000)
+      }
     }
   }
 }

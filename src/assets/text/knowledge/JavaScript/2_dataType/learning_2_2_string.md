@@ -154,3 +154,31 @@ function b64Decode(str) {
 b64Encode('你好') // "JUU0JUJEJUEwJUU1JUE1JUJE"
 b64Decode('JUU0JUJEJUEwJUU1JUE1JUJE') // "你好"
 ```
+
+## 6. 包含4字节字符串的长度
+ES6中为字符串实现了遍历器(Iterator)接口。所以可以使用for...of...遍历字符串。
+for...of...循环遍历字符串时，可以识别大于0xFFFF的码点，for循环不可以。
+```js
+var str = '𝌆'
+var num = 0
+for (s of str) {
+  num ++
+  console.log(s)
+} 
+// 𝌆
+console.log(num) // 1
+
+for (let i = 0; i < str.length; i++) {
+  console.log(str[i])
+} 
+// ''
+// ''
+```
+
+使用正则表达式匹配4字节字符串，使用replace()替换成2字节字符串后计算长度。
+```js
+var str = '𝌆'
+str.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '1').length // 1
+// 性能比for of循环计算长度差
+```
+

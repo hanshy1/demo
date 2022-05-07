@@ -1,95 +1,140 @@
 <template>
   <div>
-    <div 
-      v-for="item in items" 
-      :key="item.id">
-      <v-card
-        class="progress-container"
-        elevation="3"
-        outlined
-        :disabled="item.disabled"
-        :loading="item.loading">
-        <label>{{ item.name }}</label>
-        <v-progress-linear
-          class="progress-item"
-          :color="item.color"
-          :value="getProgressValue(item.tasks)"
-          height="30"
-          striped
-          light>
-          <template>
-            <strong class="percentage">{{ getProgressValue(item.tasks) }}%</strong>
-          </template>
-        </v-progress-linear>
-        <v-divider class="divider" />
-        <div class="task-group">
-          <div
-            v-for="task, index in item.tasks"
-            :key="index">
-            <v-btn
-              class="mx-2"
-              depressed
-              dark
-              rounded
-              :color="task.isFinished ? item.color : 'grey lighten-2'"
-              @click="toogleFinishedStatus(item, task.name)">
-              {{ task.name }}
-              <v-icon
-                right
-                dark>
-                mdi-checkbox-marked-circle
-              </v-icon>
-            </v-btn>
-          </div>
+    <v-card
+      class="progress-container"
+      :style="{width: `${width}px`}"
+      elevation="3"
+      outlined
+      :disabled="item.disabled"
+      :loading="item.loading">
+      <label>{{ item.projectName }}</label>
+      <v-progress-linear
+        class="progress-item"
+        :color="item.color"
+        :value="getProgressValue(item.assignments)"
+        :style="{width: `${width - 20}px`}"
+        height="30"
+        striped
+        light>
+        <template>
+          <strong class="percentage">{{ getProgressValue(item.assignments) }}%</strong>
+        </template>
+      </v-progress-linear>
+      <v-divider class="divider" />
+      <div class="assignment-group">
+        <div
+          v-for="assignment, index in item.assignments"
+          :key="index">
+          <v-btn
+            class="mx-2"
+            depressed
+            dark
+            rounded
+            :title="assignment.assignmentName"
+            :color="assignment.isFinished ? item.color : 'grey lighten-2'"
+            @click="editMode.isEditing
+              ? deleteAssignment(assignment.assignmentId)
+              : toogleFinishedStatus(assignment.assignmentId, assignment.isFinished)">
+            <span 
+              class="task-content"
+              :title="assignment.assignmentName">
+              {{ assignment.assignmentName }}
+            </span>
+            <v-icon
+              right
+              dark>
+              {{ editMode.isEditing ? 'mdi-close-circle-outline' : 'mdi-checkbox-marked-circle' }}
+            </v-icon>
+          </v-btn>
         </div>
-      </v-card>
-    </div>
+        <v-btn
+          v-if="editMode.isEditing"
+          icon
+          color="black"
+          @click="addAssigment">
+          <v-icon>mdi-plus-circle-outline</v-icon>
+        </v-btn>
+      </div>
+      <v-switch
+        v-model="editMode.isEditing"
+        color="success"
+        :disabled="editMode.isDisabled"
+        :loading="editMode.isLoading"
+        @change="changeEditStatus" />
+    </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
+interface dataType {
+  projectId: number,
+  projectName: string,
+  disabled: boolean,
+  loading: boolean,
+  assignments: {
+    assignmentId: number,
+    assignmentName: string,
+    isFinished: boolean
+  }[],
+  color?: string
+}
+
 @Component({})
 export default class Progress extends Vue {
 
-  // @Prop()
-  // items: any
+  @Prop()
+  item: dataType
 
-  private items = [
-    { id: 1, name: '1', disabled: false, loading: false, tasks: [{name: '1', isFinished: false}, {name: '2', isFinished: false}, {name: '3', isFinished: false}, {name: '4', isFinished: false}]},
-    { id: 2, name: '2', disabled: false, loading: false, tasks: [{name: '1', isFinished: false}, {name: '2', isFinished: false}, {name: '3', isFinished: false}, {name: '4', isFinished: false}]},
-    { id: 3, name: '3', disabled: false, loading: false, tasks: [{name: '1', isFinished: false}, {name: '2', isFinished: false}, {name: '3', isFinished: false}, {name: '4', isFinished: false}]},
-    { id: 4, name: '4', disabled: false, loading: false, tasks: [{name: '1', isFinished: false}, {name: '2', isFinished: false}, {name: '3', isFinished: false}, {name: '4', isFinished: false}]},
-    { id: 5, name: '5', disabled: false, loading: false, tasks: [{name: '1', isFinished: false}, {name: '2', isFinished: false}, {name: '3', isFinished: false}, {name: '4', isFinished: false}]},
-  ]
+  @Prop()
+  width: number
 
-  setColor(items: any[]): void {
-    const colors = ['pink', 'yellow', 'blue', 'green', 'cyan']
-    items.forEach((item, index) => {
-      item.color = colors[index % colors.length]
-    })
+  // private item = { projectId: 1, projectName: '1', disabled: false, loading: false, assignments: [{assignmentId: 1, assignmentName: '1', isFinished: false}, {assignmentId: 2, assignmentName: '2', isFinished: false}, {assignmentId: 3, assignmentName: '3', isFinished: false}, {assignmentId: 4, assignmentName: '4', isFinished: false}]}
+
+  private editMode = {
+    isEditing: false,
+    isDisabled: false,
+    isLoading: false
+  }
+ 
+  setColor(item: dataType): void {
+    // const colors = ['pink', 'yellow', 'blue', 'green', 'cyan']
+    // item.color = colors[0 % colors.length]
+    item.color = 'pink'
   }
 
   created(): void {
-    this.setColor(this.items)
+    this.setColor(this.item)
   }
 
-  getProgressValue(tasks: any[]): number {
-    return Math.ceil(tasks.filter(task => task.isFinished).length / tasks.length * 100)
+  getProgressValue(assignments: any[]): number {
+    return Math.ceil(assignments.filter(assignment => assignment.isFinished).length / assignments.length * 100)
   }
 
-  toogleFinishedStatus(item: any, taskName: string): void {
-    const targetItem = this.items.find(i => i.id === item.id) 
-    if (targetItem) {
-      const targetTask = targetItem.tasks.find(task => task.name === taskName)
-      targetTask.isFinished = !targetTask.isFinished
-      targetItem.disabled = false
-      targetItem.loading = true
-      setTimeout(function() {
-        targetItem.loading = false
-      }, 2000)
-    }
+  toogleFinishedStatus(assignmentId: number, isFinished: boolean): void {
+
+    // const targetassignment = this.items.assignments.find(assignment => assignment.assignmentName === assignmentName)
+    // targetassignment.isFinished = !targetassignment.isFinished
+    this.$emit('toogle-finished-status', { projectId: this.item.projectId, assignmentId, isFinished: !isFinished })
+    // targetItem.disabled = false
+    // targetItem.loading = true
+    // setTimeout(function() {
+    //   targetItem.loading = false
+    // }, 2000)
+    
+  }
+
+  deleteAssignment(assignmentId: number): void {
+    this.$emit('delete-assignment', { projectId: this.item.projectId, assignmentId })
+  }
+
+  changeEditStatus(isEditing: boolean): void {
+    console.log(isEditing)
+  }
+
+  addAssigment(): void {
+    this.$emit('add-assignment', this.item.projectId)
   }
 }
 </script>
@@ -101,8 +146,7 @@ export default class Progress extends Vue {
 }
 
 .progress-item {
-  margin-left: 10px;
-  width: 380px;
+  margin: 5px 10px;
   border-radius: 20px !important;
 }
 
@@ -110,7 +154,14 @@ export default class Progress extends Vue {
   margin: 10px 5px;
 }
 
-.task-group {
+.assignment-group {
   display: flex;
+  flex-wrap: wrap;
+}
+
+.task-content {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

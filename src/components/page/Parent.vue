@@ -2,20 +2,20 @@
   <div>
     <Child v-if="false" />
     <Zoomable v-if="true" is-draggable="true" />
-    <Progress />
+    <Project />
   </div>
 </template>
 
 <script lang="ts">
 import Child from './Child.vue'
 import Zoomable from '../demo/Zoomable.vue'
-import Progress from '../demo/Progress.vue'
+import Project from './Project.vue'
 
 export default {
   components: {
     Child,
     Zoomable,
-    Progress
+    Project
   },
   // props: {
   //   watchValue: Boolean

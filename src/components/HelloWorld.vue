@@ -1,15 +1,19 @@
 <template>
   <div class="hello">
     <button type="button" @click="isShowParentComp = !isShowParentComp">parent</button>
-    <Parent v-if="isShowParentComp" :watch-value="watchValue"/>
+    <Parent v-if="false" :watch-value="watchValue"/>
+    <Project v-if="isShowParentComp" />
   </div>
 </template>
 
 <script lang="ts">
 import Parent from './page/Parent.vue'
+import Project from './page/Project.vue'
+
 export default {
   components: {
-    Parent
+    Parent,
+    Project
   },
   props: {
     msg: String

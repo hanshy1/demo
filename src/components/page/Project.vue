@@ -1,16 +1,21 @@
 <template>
   <div>
     <div class="top-menu">
-      <div
-        v-for="group in groups"
-        :key="group.groupId">
-          <v-btn
-          icon
-          color="black"
-          @click="selectGroup(group.groupId)">
-          {{ group.groupName }}
-        </v-btn>
-      </div>
+      <v-row>
+        <v-col 
+          cols="12"
+          sm="6">
+          <v-select
+            :items="groups"
+            prepend-icon="mdi-map"
+            menu-props="auto"
+            label="Groups"
+            max-width="600"
+            hide-details
+            outlined
+            @change="e => getProjects(e)" />
+        </v-col>
+      </v-row>
     </div>
     <div class="project-container">
       <Progress
@@ -21,6 +26,9 @@
         @toogle-finished-status="toogleTaskIsFinished"
         @delete-assignment="deleteTask"
         @add-assignment="addTask" />
+      <div v-if="projects.length == 0">
+        <span>no projects</span>
+      </div>
     </div>
   </div>
 </template>
@@ -43,19 +51,16 @@ export default class Project extends Vue {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.$api.getGroups({ userId: 'test' }).then(groups => {
-      this.groups = groups
+      this.groups = groups.map(item => {
+        return {
+          text: item.groupName,
+          value: item.groupId
+        }
+      })
     })
-
-    // get groups
-    // get projects
-    // get assignments
-    // this.projects = [
-    //   { projectId: 1, projectName: '1', disabled: false, loading: false, assignments: [{assignmentId: 1, assignmentName: '11111111111111111111', isFinished: false}, {assignmentId: 2, assignmentName: '222222222', isFinished: false}, {assignmentId: 3, assignmentName: '333', isFinished: false}, {assignmentId: 4, assignmentName: '4', isFinished: false}]},
-    //   { projectId: 2, projectName: '1', disabled: false, loading: false, assignments: [{assignmentId: 1, assignmentName: '1', isFinished: false}, {assignmentId: 2, assignmentName: '2', isFinished: false}, {assignmentId: 3, assignmentName: '3', isFinished: false}, {assignmentId: 4, assignmentName: '4', isFinished: false}]}
-    // ]
   }
 
-  toogleTaskIsFinished(e) {
+  toogleTaskIsFinished(e): void {
     const project = this.projects.find(p => p.projectId == e.projectId)
     if (project) {
       const task = project.assignments.find(task => task.assignmentId == e.assignmentId)
@@ -63,30 +68,29 @@ export default class Project extends Vue {
         task.isFinished = e.isFinished
       }
     }
-    // ajax
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.$api.udpateTaskIsFinished({}, { assignmentId: e.assignmentId, projectId: e.projectId, isFinished: e.isFinished })
   }
 
-  deleteTask() {
-    // ajax
+  deleteTask(assignmentId): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.$api.deleteTask({}, { assignmentId })
   }
 
-  addTask() {
-    // ajax
+  addTask(payload): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.$api.createTask({}, { projectId: payload.projectId, assignmentName: payload.assignmentName })
   }
 
-  selectGroup(groupId) {
+  getProjects(groupId): void {
+    this.projects = []
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.$api.getProjects({ groupId }).then(projects => {
-      this.projects = projects.map(async (project) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const task = await this.$api.getTasks({ projectId: project.projectId })
-        return {
-          ...project,
-          assignments: task
-        }
-      })
+      this.projects = projects
     })
   }
 }

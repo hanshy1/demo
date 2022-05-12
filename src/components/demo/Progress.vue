@@ -50,18 +50,60 @@
         <v-btn
           v-if="editMode.isEditing"
           icon
-          color="black"
-          @click="addAssigment">
+          color="black lighten-2"
+          @click="isShowAddTaskDialog = true">
           <v-icon>mdi-plus-circle-outline</v-icon>
         </v-btn>
       </div>
       <v-switch
         v-model="editMode.isEditing"
+        class="edit-mode-switch"
         color="success"
         :disabled="editMode.isDisabled"
         :loading="editMode.isLoading"
+        prepend-icon="mdi-square-edit-outline"
+        hide-details
         @change="changeEditStatus" />
     </v-card>
+    <v-dialog
+      v-model="isShowAddTaskDialog"
+      persistent
+      max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">User Profile</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4">
+                <v-text-field
+                  label="Legal first name*"
+                  required />
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="isShowAddTaskDialog = false">
+            Close
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="addAssigment">
+            Add
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -97,6 +139,8 @@ export default class Progress extends Vue {
     isDisabled: false,
     isLoading: false
   }
+
+  private isShowAddTaskDialog = false
  
   setColor(item: dataType): void {
     // const colors = ['pink', 'yellow', 'blue', 'green', 'cyan']
@@ -109,24 +153,15 @@ export default class Progress extends Vue {
   }
 
   getProgressValue(assignments: any[]): number {
-    return Math.ceil(assignments.filter(assignment => assignment.isFinished).length / assignments.length * 100)
+    return Math.ceil((assignments || []).filter(assignment => assignment.isFinished).length / assignments.length * 100)
   }
 
   toogleFinishedStatus(assignmentId: number, isFinished: boolean): void {
-
-    // const targetassignment = this.items.assignments.find(assignment => assignment.assignmentName === assignmentName)
-    // targetassignment.isFinished = !targetassignment.isFinished
     this.$emit('toogle-finished-status', { projectId: this.item.projectId, assignmentId, isFinished: !isFinished })
-    // targetItem.disabled = false
-    // targetItem.loading = true
-    // setTimeout(function() {
-    //   targetItem.loading = false
-    // }, 2000)
-    
   }
 
   deleteAssignment(assignmentId: number): void {
-    this.$emit('delete-assignment', { projectId: this.item.projectId, assignmentId })
+    this.$emit('delete-assignment', assignmentId)
   }
 
   changeEditStatus(isEditing: boolean): void {
@@ -163,5 +198,12 @@ export default class Progress extends Vue {
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: none;
+}
+
+.edit-mode-switch {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
 }
 </style>

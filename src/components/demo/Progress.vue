@@ -1,70 +1,82 @@
 <template>
   <div>
-    <v-card
-      class="progress-container"
-      :style="{width: `${width}px`}"
-      elevation="3"
-      outlined
-      :disabled="item.disabled"
-      :loading="item.loading">
-      <label>{{ item.projectName }}</label>
-      <v-progress-linear
-        class="progress-item"
-        :color="item.color"
-        :value="getProgressValue(item.assignments)"
-        :style="{width: `${width - 20}px`}"
-        height="30"
-        striped
-        light>
-        <template>
-          <strong class="percentage">{{ getProgressValue(item.assignments) }}%</strong>
-        </template>
-      </v-progress-linear>
-      <v-divider class="divider" />
-      <div class="assignment-group">
-        <div
-          v-for="assignment, index in item.assignments"
-          :key="index">
-          <v-btn
-            class="mx-2"
-            depressed
-            dark
-            rounded
-            :title="assignment.assignmentName"
-            :color="assignment.isFinished ? item.color : 'grey lighten-2'"
-            @click="editMode.isEditing
-              ? deleteAssignment(assignment.assignmentId)
-              : toogleFinishedStatus(assignment.assignmentId, assignment.isFinished)">
-            <span 
-              class="task-content"
-              :title="assignment.assignmentName">
-              {{ assignment.assignmentName }}
-            </span>
-            <v-icon
-              right
-              dark>
-              {{ editMode.isEditing ? 'mdi-close-circle-outline' : 'mdi-checkbox-marked-circle' }}
-            </v-icon>
-          </v-btn>
+    <v-expansion-panels multiple>
+      <v-expansion-panel
+        v-for="project in projects"
+        :key="project.projectId">
+        <v-expansion-panel-header>Project: {{ project.projectName }}</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-card
+            class="progress-container"
+            :style="{width: `${width}px`}"
+            elevation="0"
+            :disabled="project.disabled"
+            :loading="project.loading">
+            <v-progress-linear
+              class="progress-item"
+              :color="project.color"
+              :value="getProgressValue(project.assignments)"
+              :style="{width: `${width - 20}px`}"
+              height="30"
+              striped
+              light>
+              <template>
+                <strong class="percentage">{{ getProgressValue(project.assignments) }}%</strong>
+              </template>
+            </v-progress-linear>
+            <v-divider class="divider" />
+            <div class="assignment-group">
+              <div
+                v-for="assignment, index in project.assignments"
+                :key="index">
+                <v-btn
+                  class="mx-2"
+                  depressed
+                  dark
+                  rounded
+                  :title="assignment.assignmentName"
+                  :color="assignment.isFinished ? project.color : 'grey lighten-2'"
+                  @click="editMode.isEditing
+                    ? deleteAssignment(assignment.assignmentId)
+                    : toogleFinishedStatus(project.projectId, assignment.assignmentId, assignment.isFinished)">
+                  <span 
+                    class="task-content"
+                    :title="assignment.assignmentName">
+                    {{ assignment.assignmentName }}
+                  </span>
+                  <v-icon
+                    right
+                    dark>
+                    {{ editMode.isEditing ? 'mdi-close-circle-outline' : 'mdi-checkbox-marked-circle' }}
+                  </v-icon>
+                </v-btn>
+              </div>
+              <v-btn
+                v-if="editMode.isEditing"
+                icon
+                color="black lighten-2"
+                @click="isShowAddTaskDialog = true">
+                <v-icon>mdi-plus-circle-outline</v-icon>
+              </v-btn>
+            </div>
+            <v-switch
+              v-model="editMode.isEditing"
+              class="edit-mode-switch"
+              color="success"
+              :disabled="editMode.isDisabled"
+              :loading="editMode.isLoading"
+              prepend-icon="mdi-square-edit-outline"
+              hide-details
+              @change="changeEditStatus" />
+          </v-card>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel v-if="projects.length == 0">
+        <div v-if="projects.length == 0">
+          <span>no projects</span>
         </div>
-        <v-btn
-          v-if="editMode.isEditing"
-          icon
-          color="black lighten-2"
-          @click="isShowAddTaskDialog = true">
-          <v-icon>mdi-plus-circle-outline</v-icon>
-        </v-btn>
-      </div>
-      <v-switch
-        v-model="editMode.isEditing"
-        class="edit-mode-switch"
-        color="success"
-        :disabled="editMode.isDisabled"
-        :loading="editMode.isLoading"
-        prepend-icon="mdi-square-edit-outline"
-        hide-details
-        @change="changeEditStatus" />
-    </v-card>
+      </v-expansion-panel>
+    </v-expansion-panels>
     <v-dialog
       v-model="isShowAddTaskDialog"
       persistent
@@ -110,7 +122,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
-interface dataType {
+interface projectType {
   projectId: number,
   projectName: string,
   disabled: boolean,
@@ -127,7 +139,7 @@ interface dataType {
 export default class Progress extends Vue {
 
   @Prop()
-  item: dataType
+  projects: projectType[]
 
   @Prop()
   width: number
@@ -142,22 +154,23 @@ export default class Progress extends Vue {
 
   private isShowAddTaskDialog = false
  
-  setColor(item: dataType): void {
-    // const colors = ['pink', 'yellow', 'blue', 'green', 'cyan']
-    // item.color = colors[0 % colors.length]
-    item.color = 'pink'
+  setColor(): void {
+    const colors = ['pink', 'yellow', 'blue', 'green', 'cyan']
+    this.projects.forEach((project, index) => {
+      project.color = colors[index % colors.length]
+    })
   }
 
   created(): void {
-    this.setColor(this.item)
+    this.setColor()
   }
 
   getProgressValue(assignments: any[]): number {
     return Math.ceil((assignments || []).filter(assignment => assignment.isFinished).length / assignments.length * 100)
   }
 
-  toogleFinishedStatus(assignmentId: number, isFinished: boolean): void {
-    this.$emit('toogle-finished-status', { projectId: this.item.projectId, assignmentId, isFinished: !isFinished })
+  toogleFinishedStatus(projectId: number, assignmentId: number, isFinished: boolean): void {
+    this.$emit('toogle-finished-status', { projectId, assignmentId, isFinished: !isFinished })
   }
 
   deleteAssignment(assignmentId: number): void {
@@ -168,16 +181,15 @@ export default class Progress extends Vue {
     console.log(isEditing)
   }
 
-  addAssigment(): void {
-    this.$emit('add-assignment', this.item.projectId)
+  addAssigment(projectId: number): void {
+    this.$emit('add-assignment', projectId)
   }
 }
 </script>
 <style scoped>
 .progress-container {
-  width: 400px;
+  min-width: 400px;
   min-height: 200px;
-  margin-top: 10px;
 }
 
 .progress-item {

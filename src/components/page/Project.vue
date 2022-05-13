@@ -1,34 +1,45 @@
 <template>
   <div>
     <div class="top-menu">
-      <v-row>
-        <v-col 
-          cols="12"
-          sm="6">
-          <v-select
-            :items="groups"
-            prepend-icon="mdi-map"
-            menu-props="auto"
-            label="Groups"
-            max-width="600"
-            hide-details
-            outlined
-            @change="e => getProjects(e)" />
-        </v-col>
-      </v-row>
+      <v-select
+        :items="groups"
+        menu-props="auto"
+        label="Groups"
+        max-width="600"
+        hide-details
+        outlined
+        @change="e => getProjects(e)" />
     </div>
     <div class="project-container">
-      <Progress
+      <v-expansion-panels multiple>
+        <v-expansion-panel
+          v-for="project in projects"
+          :key="project.projectId">
+          <v-expansion-panel-header>Project: {{ project.projectName }}</v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <Progress
+              :item="project"
+              width="600"
+              @toogle-finished-status="toogleTaskIsFinished"
+              @delete-assignment="deleteTask"
+              @add-assignment="addTask" />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel v-if="projects.length == 0">
+          <div v-if="projects.length == 0">
+            <span>no projects</span>
+          </div>
+        </v-expansion-panel>
+      </v-expansion-panels>
+      <!-- <Progress
         v-for="project in projects"
         :key="project.projectId"
         :item="project"
-        width="500"
+        width="600"
         @toogle-finished-status="toogleTaskIsFinished"
         @delete-assignment="deleteTask"
-        @add-assignment="addTask" />
-      <div v-if="projects.length == 0">
-        <span>no projects</span>
-      </div>
+        @add-assignment="addTask" /> -->
+
     </div>
   </div>
 </template>
@@ -95,3 +106,13 @@ export default class Project extends Vue {
   }
 }
 </script>
+<style scoped>
+.top-menu {
+  width: 648px;
+}
+
+.project-container {
+  width: 648px;
+  margin-top: 20px;
+}
+</style>

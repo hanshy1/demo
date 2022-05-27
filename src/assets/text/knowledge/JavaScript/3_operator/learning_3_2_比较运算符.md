@@ -42,6 +42,7 @@ true > false // true
 NaN > NaN // false
 null > NaN // false
 undefined > NaN // false
+1 > undefined // false (undefined转换成NaN)
 ```
 
 ### 2) 对象
@@ -89,6 +90,8 @@ undefined和null与自身严格相等。
 undefined === undefined // true
 null === null // true
 
+null === undefined // false
+
 var v1;
 var v2;
 v1 === v2 // true
@@ -131,6 +134,7 @@ undefined == 0 // false
 false == 'false'    // false
 false == '0'        // true
 
+// null和undefined只有和自身或相互比较相等时才会返回true
 false == undefined  // false
 false == null       // false
 null == undefined   // true

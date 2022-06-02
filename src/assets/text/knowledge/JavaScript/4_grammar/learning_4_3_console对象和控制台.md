@@ -147,7 +147,21 @@ unmonitorEvents方法用于停止监听。
 ```js
 monitorEvents(window, "resize");
 monitorEvents(window, ["resize", "scroll"])
+
+unmonitorEvents(window, 'resize')
 ```
+
+monitorEvents允许监听同一大类的事件。所有事件可以分成四个大类。
+* mouse："mousedown", "mouseup", "click", "dblclick", "mousemove", "mouseover", "mouseout", "mousewheel"
+* key："keydown", "keyup", "keypress", "textInput"
+* touch："touchstart", "touchmove", "touchend", "touchcancel"
+* control："resize", "scroll", "zoom", "focus", "blur", "select", "change", "submit", "reset"
+
+## 10. 其他方法
+* clear(): 清空控制台消息。
+* copy(object): 复制特定DOM元素到剪贴板。
+* dir(object): 显示特定对象的所有属性，是console.dir()的别名。
+* dirxml(object): 显示特定对象的XML形式，是console.dirxmml()的别名。
 
 # 四、debugger 语句
 debugger语句主要用于除错，作用是设置断点。  

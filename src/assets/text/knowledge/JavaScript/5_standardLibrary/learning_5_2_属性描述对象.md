@@ -54,6 +54,19 @@ obj.p3 // "123abc"
 注意，一旦定义了取值函数get（或存值函数set），就不能将writable属性设为true，或者同时定义value属性，否则会报错。
 
 Object.defineProperty()和Object.defineProperties()参数里面的属性描述对象，writable、configurable、enumerable这三个属性的默认值都为false。
+```js
+var obj = {}
+Object.defineProperty(obj, 'a', {value: 1})
+obj.a = 2
+console.log(obj) // {a: 1}
+console.dir(Object.getOwnPropertyDescriptor(obj, 'a'))
+/* Object {
+configurable: false
+enumerable: false
+value: 1
+writable: false}
+*/
+```
 
 # 五、Object.prototype.propertyIsEnumerable()
 实例对象的propertyIsEnumerable()方法返回一个布尔值，用来判断某个属性是否可遍历。  
@@ -135,7 +148,7 @@ JSON.stringify方法会排除enumerable为false的属性，有时可以利用这
 configurable(可配置性）返回一个布尔值，决定了是否可以修改属性描述对象。  
 configurable为false时，writable、enumerable和configurable都不能被修改了。
 * writable属性只有在false改为true时会报错，true改为false是允许的。
-* value属性的情况比较特殊。只要writable和configurable有一个为true，就允许改动value。
+* value属性的情况比较特殊。只要writable和configurable有一个为true，就允许改动value，否则会报错。
 * 目标属性不能被删除（delete）
 
 ```js
@@ -188,10 +201,29 @@ var obj2 = {
   }
 };
 ```
+accessor和value或者writable一起定义时会报错。
+```js
+Object.defineProperty({}, 'a', {
+  value: 1,
+  get() {
+    return '1'
+  }
+}) // TypeError: Invalid property descriptor. Cannot both specify accessors and a value or writable attribute
+
+Object.defineProperty({}, 'a', {
+  writable: false,
+  get() {
+    return '1'
+  }
+}) // TypeError: Invalid property descriptor. Cannot both specify accessors and a value or writable attribute
+```
 
 # 八、控制对象的状态
 有时需要冻结对象的读写状态，防止对象被改变。  
 JavaScript 提供了三种冻结方法，最弱的一种是Object.preventExtensions，其次是Object.seal，最强的是Object.freeze。
+* Object.preventExtensions(): 无法添加属性，可以删除属性，可以修改属性。(writable为true的场合)
+* Object.seal(): 无法添加属性，无法删除属性，可以修改属性。(相当于configurable为false)
+* Object.freeze(): 无法添加属性，无法删除属性，无法修改属性。
 
 ## 1. Object.preventExtensions()
 Object.preventExtensions方法可以使得一个对象无法再添加新的属性。但是可以修改原有的属性的值，也可以删除原有属性。因为可写性由writable决定。
@@ -242,7 +274,8 @@ Object.isExtensible(obj) // false
 ```
 
 ## 5. Object.freeze()
-Object.freeze方法可以使得一个对象无法添加新属性、无法删除旧属性、也无法改变属性的值，使得这个对象实际上变成了常量。
+Object.freeze方法可以使得一个对象无法添加新属性、无法删除旧属性、也无法改变属性的值，使得这个对象实际上变成了常量。  
+数组作为一种对象，当它被冻结时，数组元素也无法添加、修改和删除。(push, pop等修改数组的方法也会失败)
 ```js
 var obj = {
   p: 'hello'
@@ -277,7 +310,7 @@ obj.t
 ```
 可以通过把原型对象也冻住，来解决这个问题。
 
-另外一个局限是，如果属性值是对象，上面这些方法只能冻结参数指向的对象，而不能冻结参数对象属性值指向的对象。
+另外一个局限是，如果属性值是对象，上面这些方法只能冻结参数指向的对象，而不能冻结参数对象属性值指向的对象(浅冻结)。
 ```js
 var obj = {
   foo: 1,

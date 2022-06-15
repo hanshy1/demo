@@ -1,5 +1,5 @@
 # Number
-Number作为构造函数时，用于生成数值的对象。
+Number作为构造函数时，用于生成数值的对象。  
 Number()方法也可以用于数据类型的转换。
 
 # 静态属性
@@ -34,7 +34,7 @@ Number.MIN_SAFE_INTEGER // -9007199254740991
 Number对象有4个实例方法，都跟将数值转换成指定格式有关。
 
 ## Number.prototype.toString()
-Number对象部署了自己的toString方法，用来将一个数值转为字符串形式。
+Number对象部署了自己的toString方法，用来将一个数值转为字符串形式。  
 可以接受一个参数，表示输出的进制。如果省略这个参数，默认将数值先转为十进制，再输出字符串；否则，就根据参数指定的进制，将一个数字转化成某个进制的字符串。
 ```js
 (10).toString(2) // "1010"
@@ -51,6 +51,8 @@ Number对象部署了自己的toString方法，用来将一个数值转为字符
 10 .toString(2) // "1010"
 10.0.toString(2) // "1010"
 ```
+toString()用于将十进制数值转为其他进制，parseInt()用于将其他进制数转为十进制。
+
 
 ## Number.prototype.toFixed()
 toFixed()方法先将一个数转为指定位数的小数，然后返回这个小数对应的字符串。
@@ -59,7 +61,7 @@ toFixed()方法先将一个数转为指定位数的小数，然后返回这个�
 10.005.toFixed(2) // "10.01"
 ```
 
-toFixed()方法的参数为小数位数，有效范围为0到100，超出这个范围将抛出 RangeError 错误。
+toFixed()方法的参数为小数位数，有效范围为0到100，超出这个范围将抛出 RangeError 错误。  
 由于浮点数的原因，小数5的四舍五入是不确定的，使用的时候必须小心。
 ```js
 (10.055).toFixed(2) // 10.05
@@ -96,8 +98,8 @@ Number.prototype.toLocaleString()方法接受一个地区码作为参数，返�
 // "一二三"
 ```
 
-该方法还可以接受第二个参数配置对象，用来定制指定用途的返回字符串。
-该对象的style属性指定输出样式，默认值是decimal，表示输出十进制形式。如果值为percent，表示输出百分数。
+该方法还可以接受第二个参数配置对象，用来定制指定用途的返回字符串。  
+该对象的style属性指定输出样式，默认值是decimal，表示输出十进制形式。如果值为percent，表示输出百分数。  
 如果style属性的值为currency，则可以搭配currency属性，输出指定格式的货币字符串形式。
 ```js
 (123).toLocaleString('zh-Hans-CN', { style: 'percent' }) // "12,300%"
@@ -106,5 +108,5 @@ Number.prototype.toLocaleString()方法接受一个地区码作为参数，返�
 (123).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) // "$123.00"
 ```
 
-如果Number.prototype.toLocaleString()省略了参数，则由浏览器自行决定如何处理，通常会使用操作系统的地区设定。
+如果Number.prototype.toLocaleString()省略了参数，则由浏览器自行决定如何处理，通常会使用操作系统的地区设定。  
 该方法如果使用浏览器不认识的地区码，会抛出一个错误。

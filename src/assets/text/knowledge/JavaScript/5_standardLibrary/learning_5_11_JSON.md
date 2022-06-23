@@ -18,7 +18,7 @@ JSON 对值的类型和格式有严格的规定。
 JSON对象是 JavaScript 的原生对象，用来处理 JSON 格式数据。它有两个静态方法：JSON.stringify()和JSON.parse()。
 
 # JSON.stringify()
-JSON.stringify()方法用于将一个值转为 JSON 字符串。该字符串符合 JSON 格式，并且可以被JSON.parse()方法还原。
+JSON.stringify()方法用于将一个值转为 JSON 字符串。该字符串符合 JSON 格式，并且可以被JSON.parse()方法还原。  
 对于原始字符串，stringify()转换结果会带上双引号，这样将来还原的时候，就能知道这是一个字符串，而不是其他值。
 ```js
 JSON.stringify('abc') // ""abc""
@@ -49,10 +49,10 @@ JSON.stringify(arr) // "[null,null]"
 
 正则对象会被转成空对象。
 
-JSON.stringify()方法会忽略对象的不可遍历的属性。
+JSON.stringify()方法会忽略对象的不可遍历（enumerable=false）的属性。
 
 ## 第二个参数
-JSON.stringify()方法还可以接受一个数组，作为第二个参数，指定参数对象的哪些属性需要转成字符串,只对对象的属性有效，对数组无效。
+JSON.stringify()方法还可以接受一个数组，作为第二个参数，指定参数对象的哪些属性需要转成JSON字符串,只对对象的属性有效，对数组无效。
 ```js
 JSON.stringify(['a', 'b'], ['0']) // "["a","b"]"
 

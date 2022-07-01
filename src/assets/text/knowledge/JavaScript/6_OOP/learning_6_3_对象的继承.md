@@ -21,9 +21,9 @@ cat1.meow === cat2.meow // false
 cat1和cat2是同一个构造函数的两个实例，它们都具有meow方法，但是生成了两次，所以不是同一个内存地址。
 
 ## prototype 属性的作用
-JavaScript 继承机制的设计思想就是，原型对象的所有属性和方法，都能被实例对象共享。
+JavaScript 继承机制的设计思想就是，构造函数的原型对象的所有属性和方法，都能被实例对象共享。  
 
-JavaScript 规定，每个函数都有一个prototype属性，指向一个对象。
+JavaScript 规定，每个函数都有一个prototype属性，指向一个对象。  
 对于普通函数来说，该属性基本无用。但是，对于构造函数来说，生成实例的时候，该属性会自动成为实例对象的原型。
 ```js
 function Animal(name) {
@@ -42,8 +42,34 @@ cat2.color // 'red'
 
 当实例对象本身没有某个属性或方法的时候，它会到原型对象去寻找该属性或方法。这就是原型对象的特殊之处。
 
+## Function.prototype
+所有函数的原型都指向Function.prototype，包括Function本身。
+```js
+String.__proto__ === Function.prototype // true
+Object.__proto__ === Function.prototype // true
+Function.__proto__ === Function.prototype // true
+```
+
+Function.prototype本身是一个函数对象，包含call，apply，bind等方法（所有函数可以依靠原型链调用这些方法）。  
+Function.prototype被设置为函数的原因是为了向后兼容ES5和以前的代码。本身可以接收任何参数，返回undefined，不具有prototype属性。
+> The Function prototype object is specified to be a function object to ensure compatibility with ECMAScript code that was created prior to the ECMAScript 2015 specification.  
+> https://262.ecma-international.org/6.0/#sec-properties-of-the-function-prototype-object
+```js
+typeof Function.prototype // "function"
+Function.prototype.prototype // undefined
+Function.prototype.__proto__ === Object.prototype // true
+```
+Function.prototype的原型指向Object.prototype，所有的函数都可以根据原型链调用Object.prototype上的方法。  
+所有构造函数的原型指向Function.prototype，所以说“万物皆对象，函数是一等公民”。
+
+## __proto__和prototype的区别
+__proto__是浏览器中实现的属性。  
+实例对象的__proto__属性用来指向原型链的上一层原型对象（一般是构造函数的prototype）。  
+构造函数的prototype中定义的属性和方法，可以被实例对象继承引用（实例对象中没有进行覆盖时）。  
+实例对象设置prototype属性没有实际意义，相当于普通的属性值。
+
 # 原型链
-JavaScript 规定，所有对象都有自己的原型对象（prototype）。
+JavaScript 规定，所有对象都有自己的原型对象（prototype）。  
 一方面，任何一个对象，都可以充当其他对象的原型；另一方面，由于原型对象也是对象，所以它也有自己的原型。因此，就会形成一个“原型链”（prototype chain）：对象到原型，再到原型的原型……
 
 如果一层层的上溯，所有对象的的原型最终都可以上溯的Object.prototype。而Object.prototype的原型指向null。因此原型链的尽头就是null。
@@ -53,9 +79,14 @@ Object.__proto__ // Function.prototype
 Function.__proto__ // Function.prototype
 Function.prototype.__proto__ // Object.prototype
 Object.prototype.__proto__ // null
+
+typeof Function.prototype // "function"
+typeof Object.prototype // "object"
 ```
 
 读取对象的某个属性时，JavaScript 引擎先寻找对象本身的属性，如果找不到，就到它的原型去找，如果还是找不到，就到原型的原型去找。如果直到最顶层的Object.prototype还是找不到，则返回undefined。如果对象自身和它的原型，都定义了一个同名属性，那么优先读取对象自身的属性，这叫做“覆盖”（overriding）。
+
+在整个原型链上寻找属性是很耗费性能的，如果寻找某个不存在的属性，将遍历整个原型链。
 
 ## constructor 属性
 prototype对象有一个constructor属性，默认指向prototype对象所在的构造函数。

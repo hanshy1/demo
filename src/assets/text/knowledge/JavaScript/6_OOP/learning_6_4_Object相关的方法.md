@@ -72,7 +72,7 @@ o1.isPrototypeOf(o2) // true
 # Object.prototype.__proto__
 实例对象的__proto__属性（前后各两个下划线），返回该对象的原型对象。该属性可读写。
 
-__proto__属性只有浏览器才需要部署，其他环境可以没有这个属性。
+__proto__属性只有浏览器才需要部署，其他环境可以没有这个属性。  
 它前后的两根下划线，表明它本质是一个内部属性，不应该对使用者暴露。因此，应该尽量少用这个属性，而是用Object.getPrototypeOf()和Object.setPrototypeOf()，进行原型对象的读写操作。
 
 获取实例对象obj的原型对象，有三种方法。
@@ -81,7 +81,7 @@ obj.__proto__
 obj.constructor.prototype
 Object.getPrototypeOf(obj)
 ```
-__proto__属性只有浏览器才需要部署，其他环境可以不部署。而obj.constructor.prototype在手动改变原型对象时，可能会失效。
+__proto__属性只有浏览器才需要部署，其他环境可以不部署。而obj.constructor.prototype在手动改变原型对象时，可能会失效。  
 因此，推荐使用第三种方式取得原型对象。
 
 # Object.getOwnPropertyNames()

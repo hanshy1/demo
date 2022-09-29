@@ -1,0 +1,3 @@
+# docker相关
+linux容器可以在windows系统上运行，因为docker for windows可以通过hyper-v Moby linux VM和LinuxKit构建linux运行环境，也就是docker创建了一个具有linux内核的虚拟机环境。目前windows发布了WSL2（Windows Subsystem for Linux）后，在vm上实现了真正的linux内核，docker目前最新版本中使用WSL2实现linux运行环境  
+windows容器不能在linux上运行，docker for linux中不会实现windows运行环境（因为windows系统本身不开源，需要购买激活码激活；相比于linux十几兆的运行环境，windows会有几个G的大小）

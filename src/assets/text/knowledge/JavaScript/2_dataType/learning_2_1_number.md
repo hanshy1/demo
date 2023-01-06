@@ -165,6 +165,13 @@ NaN转换为boolean时为false。
 
 NaN与任何数（包括它自己）的运算，得到的都是NaN。
 
+常见被转换为数字时为NaN的值：
+```js
+Number({}) // NaN
+Number(undefined) // NaN
+Number(null) // null转数字为0
+```
+
 ### 3) Infinity
 Infinity代表无穷大。非零数值除以零得到Infinity.
 ```js

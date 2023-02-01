@@ -20,6 +20,12 @@ typeof Function // "function"
 typeof undefined // "undefined"
 typeof null // "object"
 ```
+typeof null输出“object”，但null本质不是对象，null没有原型，也不能访问属性和方法。造成这个现象的原因是在初版JS中，JS的数据被设计为存储在一个32位单元中，1-3位表示类型标签（type tag），其余表示值，typeof通过类型标签来判断值的类型。object的类型标签为000，undefined（JSVAL_VOID）为整数-2^30（整数范围外的数），null（JSVAL_NULL）为机器代码NULL的指针（空指针地址一般为0）或者跟object的类型标签相同。  
+typeof在js引擎中的运行逻辑是：
+1. 通过equals比较类型标签，判断值是否为undefined，不是undefined则进行下一步判断。
+2. 比较类型标签，判断值是否为object，如果是object，则判断值是否可调用或者内部属性[[Class]]标识为function，满足条件则值为function，否则为object。如果值不是object则进行下一步判断。
+3. 比较类型标签，依次判断值是否为number、string、boolean。
+https://2ality.com/2013/10/typeof-null.html
 
 ## 2. null和undefined
 null代表一个空的对象，转为数值时为0；undefined是一个原始值，表示“此处无定义”，转为数值时为NaN。  

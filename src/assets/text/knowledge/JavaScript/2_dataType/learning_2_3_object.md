@@ -66,7 +66,7 @@ obj['foo'] // 123
 可以使用Object.keys()方法查看一个对象的所有属性。
 
 ### 1) delete操作符
-delete操作符用于删除对象的属性，删除成功后返回true。
+delete操作符用于删除对象的属性（不能删除从原型上继承的属性），删除成功后返回true。
 ```js
 var obj = { a: 1, b: 2 }
 obj.a  // 1

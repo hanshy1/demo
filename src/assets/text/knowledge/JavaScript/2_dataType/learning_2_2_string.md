@@ -155,6 +155,39 @@ b64Encode('你好') // "JUU0JUJEJUEwJUU1JUE1JUJE"
 b64Decode('JUU0JUJEJUEwJUU1JUE1JUJE') // "你好"
 ```
 
+## encodeURIComponent()和encodeURI()
+encodeURIComponent()和encodeURI()都用来将URI非法字符转化成合法字符。  
+encodeURIComponent()和encodeURI()编码字符时范围不同：
+```js
+var set1 = ";,/?:@&=+$";  // 保留字符
+var set2 = "-_.!~*'()";   // 不转义字符
+var set3 = "#";           // 数字标志
+var set4 = "ABC abc 123"; // 字母数字字符和空格
+
+console.log(encodeURI(set1)); // ;,/?:@&=+$
+console.log(encodeURI(set2)); // -_.!~*'()
+console.log(encodeURI(set3)); // #
+console.log(encodeURI(set4)); // ABC%20abc%20123 (空格被编码为 %20)
+
+console.log(encodeURIComponent(set1)); // %3B%2C%2F%3F%3A%40%26%3D%2B%24
+console.log(encodeURIComponent(set2)); // -_.!~*'()
+console.log(encodeURIComponent(set3)); // %23
+console.log(encodeURIComponent(set4)); // ABC%20abc%20123 (空格被编码为 %20)
+```
+
+如果需要编码整个URL，使用encodeURI()方法，如果使用encodeURIComponent()会则会将:/等字符都进行编码。
+```js
+var url = 'http://www.example.com/home/t e s t';
+console.log(encodeURI(url)); // "http://www.example.com/home/t%20e%20s%20t"
+```
+
+如果需要编码URL中参数的值，使用encodeURIComponent()方法。
+```js
+var param = 'http://www.example.com/home/t e s t';
+var url = 'http://www.example.com/test?param=' + encodeURIComponent(param);
+console.log(url); // "http://www.example.com/test?param=http%3A%2F%2Fwww.example.com%2Fhome%2Ft%20e%20s%20t"
+```
+
 ## 6. 包含4字节字符串的长度
 ES6中为字符串实现了遍历器(Iterator)接口。所以可以使用for...of...遍历字符串。
 for...of...循环遍历字符串时，可以识别大于0xFFFF的码点，for循环不可以。

@@ -129,9 +129,9 @@ a[1] // undefined
 使用delete命令删除一个数组成员，会形成空位，并且不会影响length属性。
 ```js
 var a = [1, 2, 3];
-delete a[1];
+delete a[2];
 
-a[1] // undefined
+a[2] // undefined
 a.length // 3
 ```
 length属性不会过滤空位，所以使用length属性遍历数组时，需要小心。

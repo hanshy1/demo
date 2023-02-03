@@ -36,6 +36,7 @@ Object.getOwnPropertyNames(a) // ["0", "1", "length"]
 ## 2. Object的其他静态方法
 1. 对象属性模型的相关方法
 * Object.getOwnPropertyDescriptor()：获取某个属性的描述对象。
+* Object.getOwnPropertyDescriptors(): 获取对象的全部属性描述对象。
 * Object.defineProperty()：通过描述对象，定义某个属性。
 * Object.defineProperties()：通过描述对象，定义多个属性。
 

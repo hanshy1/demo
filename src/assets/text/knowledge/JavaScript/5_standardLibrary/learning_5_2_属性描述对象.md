@@ -70,7 +70,7 @@ writable: false}
 
 # 五、Object.prototype.propertyIsEnumerable()
 实例对象的propertyIsEnumerable()方法返回一个布尔值，用来判断某个属性是否可遍历。  
-这个方法只能用于判断对象自身的属性，对于继承的属性一律返回false。
+这个方法只能用于判断对象自身的属性，对于不存在的属性和继承的属性一律返回false。
 
 # 六、元属性
 属性描述对象的各个属性称为“元属性”，因为它们可以看作是控制属性的属性。
@@ -113,6 +113,19 @@ var obj = Object.create(proto);
 obj.foo = 'b';
 obj.foo // 'a'
 ```
+如果原型对象的属性值是对象，子对象仍然能修改对象的属性。
+```js
+var proto = Object.defineProperty({}, 'foo', {
+  value: {a: 'a'},
+  writable: false
+});
+
+var obj = Object.create(proto);
+
+obj.foo.a = 'b'; // 修改了原型对象中a的属性
+obj.foo.a // 'b'
+```
+
 但是，有一个规避方法，就是通过覆盖属性描述对象，绕过这个限制。原因是这种情况下，原型链会被完全忽视。
 ```js
 var proto = Object.defineProperty({}, 'foo', {
@@ -218,6 +231,18 @@ Object.defineProperty({}, 'a', {
 }) // TypeError: Invalid property descriptor. Cannot both specify accessors and a value or writable attribute
 ```
 
+setter中不能修改对应属性的值，否则会无限递归。
+```js
+var obj = {a: 1}
+Object.defineProperty(obj, 'a', {
+  set(v) {
+    this.a = v // 赋值操作会触发set，导致无限递归
+  }
+})
+obj.a = 10 // error
+```
+
+
 # 八、控制对象的状态
 有时需要冻结对象的读写状态，防止对象被改变。  
 JavaScript 提供了三种冻结方法，最弱的一种是Object.preventExtensions，其次是Object.seal，最强的是Object.freeze。
@@ -226,7 +251,7 @@ JavaScript 提供了三种冻结方法，最弱的一种是Object.preventExtensi
 * Object.freeze(): 无法添加属性，无法删除属性，无法修改属性。
 
 ## 1. Object.preventExtensions()
-Object.preventExtensions方法可以使得一个对象无法再添加新的属性。但是可以修改原有的属性的值，也可以删除原有属性。因为可写性由writable决定。
+Object.preventExtensions方法可以使得一个对象无法再添加新的属性。但是可以修改原有的属性的值，也可以删除原有属性。因为可写性由writable决定。（数组push()也会失败）
 ```js
 var obj = { a: 1 };
 Object.preventExtensions(obj);
@@ -300,10 +325,11 @@ Object.isFrozen方法用于检查一个对象是否使用了Object.freeze方法�
 ## 7. 局限性
 上面的三个方法锁定对象的可写性有一个漏洞：可以通过改变原型对象，来为对象增加属性。
 ```js
-var obj = new Object();
+var proto = {};
+var obj = Object.create(proto);
+
 Object.preventExtensions(obj);
 
-var proto = Object.getPrototypeOf(obj);
 proto.t = 'hello';
 obj.t
 // hello
